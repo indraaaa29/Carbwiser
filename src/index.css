@@ -166,3 +166,11 @@ input[type=range]::-moz-range-thumb {
   box-shadow: 0 0 0 4px var(--color-sage-muted);
   border: none;
 }
+
+/* Custom grid for eco accommodation listings */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+

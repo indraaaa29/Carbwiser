@@ -5,7 +5,6 @@ interface SidebarProps {
   setView: (view: string) => void;
   onReset: () => void;
   theme: 'light' | 'dark';
-  toggleTheme: () => void;
   userName?: string;
   userLevel?: string;
 }
@@ -15,7 +14,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   setView,
   onReset,
   theme,
-  toggleTheme,
   userName = "Alex R.",
   userLevel = "Level 4 Steward",
 }) => {
@@ -26,14 +24,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
         { id: 'roadmap', label: 'My Roadmap', icon: 'route' },
         { id: 'ledger', label: 'Impact Ledger', icon: 'account_balance_wallet' },
         { id: 'simulations', label: 'Simulations', icon: 'model_training' },
+        { id: 'stays', label: 'Eco Stays', icon: 'travel_explore' },
       ]
     : [
         { id: 'overview', label: 'Dashboard', icon: 'dashboard' },
         { id: 'roadmap', label: 'Roadmap', icon: 'alt_route' },
         { id: 'simulations', label: 'Simulator', icon: 'analytics' },
+        { id: 'stays', label: 'Eco Stays', icon: 'travel_explore' },
       ];
 
-  const sidebarTitle = theme === 'dark' ? 'CarbonPath' : 'Eco Companion';
+  const sidebarTitle = 'CarbWiser';
   const sidebarSubtitle = theme === 'dark' ? 'Elite Stewardship' : 'Carbon Neutral Path';
 
   return (
@@ -71,18 +71,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       <div className="mt-auto pt-lg border-t border-outline-variant dark:border-surface-variant flex flex-col gap-xs">
-        <button
-          onClick={toggleTheme}
-          className="flex items-center gap-md px-md py-sm text-on-surface-variant dark:text-surface-variant hover:bg-surface-variant dark:hover:bg-surface-container-highest rounded-lg transition-all cursor-pointer text-left w-full"
-        >
-          <span className="material-symbols-outlined">
-            {theme === 'dark' ? 'light_mode' : 'dark_mode'}
-          </span>
-          <span className="text-label-md font-label-md">
-            {theme === 'dark' ? 'Light Theme' : 'Dark Theme'}
-          </span>
-        </button>
-
         <button
           onClick={onReset}
           className="flex items-center gap-md px-md py-sm text-on-surface-variant dark:text-surface-variant hover:bg-surface-variant dark:hover:bg-surface-container-highest rounded-lg transition-all cursor-pointer text-left w-full"

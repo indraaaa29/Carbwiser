@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import type { UserProfile, CarbonFootprint, ActionRecommendation, SimulationResult } from './types';
 import { calculateBaseFootprint, generateStaticRecommendations } from './utils/calculator';
 import { Sidebar } from './components/Sidebar';
@@ -9,9 +9,10 @@ import { Dashboard } from './features/dashboard/Dashboard';
 import { Roadmap } from './features/roadmap/Roadmap';
 import { Ledger } from './features/ledger/Ledger';
 import { Simulator } from './features/simulator/Simulator';
+import { EcoStays } from './features/stays/EcoStays';
 
 export default function App() {
-  const [apiKey, setApiKey] = useState<string>(() => localStorage.getItem('cp_key') || '');
+  const [apiKey] = useState<string>(() => localStorage.getItem('cp_key') || '');
   const [profile, setProfile] = useState<UserProfile | null>(() => {
     const cached = localStorage.getItem('cw_profile');
     return cached ? JSON.parse(cached).profile : null;
@@ -45,29 +46,17 @@ export default function App() {
     return cached ? 'overview' : 'landing';
   });
 
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    const cachedTheme = localStorage.getItem('cw_theme');
-    return (cachedTheme === 'light' || cachedTheme === 'dark') ? cachedTheme : 'dark';
-  });
+  const [theme] = useState<'light' | 'dark'>('light');
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // Apply theme class to HTML element on change
   useEffect(() => {
     const root = window.document.documentElement;
-    if (theme === 'dark') {
-      root.classList.add('dark');
-      root.classList.remove('light');
-    } else {
-      root.classList.add('light');
-      root.classList.remove('dark');
-    }
-    localStorage.setItem('cw_theme', theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
-  };
+    root.classList.add('light');
+    root.classList.remove('dark');
+    localStorage.setItem('cw_theme', 'light');
+  }, []);
 
   const handleOnboardSubmit = (userProfile: UserProfile) => {
     setIsLoading(true);
@@ -159,11 +148,7 @@ export default function App() {
     };
   };
 
-  const saveKey = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const key = e.target.value;
-    setApiKey(key);
-    localStorage.setItem('cp_key', key);
-  };
+
 
   // Switch views
   if (currentView === 'landing') {
@@ -180,21 +165,12 @@ export default function App() {
   if (currentView === 'assessment') {
     return (
       <div className="relative min-h-screen flex items-center justify-center p-6 bg-background">
-        <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
-          <input
-            type="password"
-            value={apiKey}
-            onChange={saveKey}
-            placeholder="Anthropic API Key"
-            className="bg-black/20 border border-white/10 rounded-xl py-2 px-3 text-xs text-on-surface placeholder:text-slate-500 focus:border-primary focus:outline-none"
-          />
-        </div>
         {/* Background Atmospheric Glow */}
         <div className="fixed inset-0 pointer-events-none z-[-1] overflow-hidden">
           <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-emerald-500/10 blur-[120px]" />
           <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-500/10 blur-[120px]" />
         </div>
-        <div className="w-full max-w-2xl">
+        <div className="w-full max-w-[672px]">
           <div className="mb-4">
             <button
               onClick={() => setView('landing')}
@@ -223,21 +199,12 @@ export default function App() {
         setView={setView} 
         onReset={handleReset}
         theme={theme}
-        toggleTheme={toggleTheme}
       />
 
       {/* Mobile Header Navigation */}
       <nav className="lg:hidden fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile h-16 bg-surface/80 backdrop-blur-xl border-b border-outline-variant dark:border-white/10 shadow-[0_0_15px_rgba(16,185,129,0.05)]">
         <h1 className="font-headline-md text-headline-md font-bold text-primary tracking-tight">CarbWiser</h1>
         <div className="flex gap-4">
-          <button
-            onClick={toggleTheme}
-            className="text-on-surface-variant hover:text-on-surface transition-colors active:scale-95 duration-200 cursor-pointer"
-          >
-            <span className="material-symbols-outlined">
-              {theme === 'dark' ? 'light_mode' : 'dark_mode'}
-            </span>
-          </button>
           <div className="w-8 h-8 rounded-full bg-surface-container-high border border-white/10 overflow-hidden">
             <img 
               alt="User profile avatar" 
@@ -281,6 +248,9 @@ export default function App() {
             onRunAIPrompt={handleRunAIPrompt} 
             theme={theme}
           />
+        )}
+        {currentView === 'stays' && (
+          <EcoStays />
         )}
       </main>
 

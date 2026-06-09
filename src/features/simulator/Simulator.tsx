@@ -7,9 +7,7 @@ interface SimulatorProps {
   onRunAIPrompt: (prompt: string, current: number) => Promise<SimulationResult>;
 }
 
-export const Simulator: React.FC<SimulatorProps> = ({ currentFootprint, theme, onRunAIPrompt }) => {
-  const isDark = theme === 'dark';
-
+export const Simulator: React.FC<SimulatorProps> = ({ currentFootprint, onRunAIPrompt }) => {
   // Simulator controls state
   const [commute, setCommute] = useState<number>(150);
   const [meatDays, setMeatDays] = useState<number>(4);
@@ -112,7 +110,7 @@ export const Simulator: React.FC<SimulatorProps> = ({ currentFootprint, theme, o
         {/* Header */}
         <header className="mb-xl">
           <h1 className="text-display-lg font-display-lg text-on-surface mb-sm">What-If Simulator</h1>
-          <p className="text-body-lg font-body-lg text-on-surface-variant max-w-2xl">
+          <p className="text-body-md font-body-md text-on-surface-variant max-w-[672px] mt-sm">
             Adjust lifestyle factors to instantly visualize their impact on your carbon footprint and potential financial savings.
           </p>
         </header>
@@ -141,14 +139,14 @@ export const Simulator: React.FC<SimulatorProps> = ({ currentFootprint, theme, o
                 <button 
                   onClick={handleRunAi}
                   disabled={isSimulating || !searchQuery.trim()}
-                  className="w-full md:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-secondary-container to-primary-container text-white font-label-sm font-semibold hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 whitespace-nowrap cursor-pointer h-[52px] flex items-center justify-center"
+                  className="w-full md:w-auto px-8 py-4 rounded-xl bg-secondary text-white font-label-sm font-semibold hover:bg-secondary/90 hover:shadow-sm transition-all transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 whitespace-nowrap cursor-pointer h-[52px] flex items-center justify-center"
                 >
                   {isSimulating ? 'Simulating...' : 'Run Simulation'}
                 </button>
               </div>
 
               {aiResult && (
-                <div className="p-lg bg-surface-bright dark:bg-black/20 rounded-xl border border-outline-variant dark:border-white/5 relative overflow-hidden">
+                <div className="p-lg bg-surface-container-low dark:bg-black/20 rounded-xl border border-outline-variant dark:border-white/5 relative overflow-hidden">
                   <div className="flex justify-between items-center mb-sm border-b border-surface-variant dark:border-white/5 pb-2">
                     <h4 className="font-bold text-primary">AI Simulation Result</h4>
                     <button 
@@ -245,7 +243,7 @@ export const Simulator: React.FC<SimulatorProps> = ({ currentFootprint, theme, o
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
                 {/* Toggle 1 */}
-                <div className="flex items-center justify-between p-md border border-surface-variant rounded-lg bg-surface-bright dark:bg-surface-container-low">
+                <div className="flex items-center justify-between p-md border border-surface-variant rounded-lg bg-surface-container-low">
                   <div>
                     <p className="text-body-md font-body-md font-medium text-on-surface">Renewable Energy</p>
                     <p className="text-label-sm font-label-sm text-on-surface-variant">Switch provider</p>
@@ -262,7 +260,7 @@ export const Simulator: React.FC<SimulatorProps> = ({ currentFootprint, theme, o
                 </div>
 
                 {/* Toggle 2 */}
-                <div className="flex items-center justify-between p-md border border-surface-variant rounded-lg bg-surface-bright dark:bg-surface-container-low">
+                <div className="flex items-center justify-between p-md border border-surface-variant rounded-lg bg-surface-container-low">
                   <div>
                     <p className="text-body-md font-body-md font-medium text-on-surface">LED Conversion</p>
                     <p className="text-label-sm font-label-sm text-on-surface-variant">All fixtures</p>
@@ -283,61 +281,60 @@ export const Simulator: React.FC<SimulatorProps> = ({ currentFootprint, theme, o
 
           {/* Feedback Panel */}
           <div className="lg:col-span-5 h-full">
-            <div className={`rounded-xl p-xl shadow-lg text-white overflow-hidden relative ${isDark ? 'bg-surface-container-high border border-white/5' : 'bg-forest-dark'}`}>
-              {/* Decorative glows */}
-              <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary rounded-full blur-3xl opacity-50 pointer-events-none"></div>
-              <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-secondary rounded-full blur-3xl opacity-30 pointer-events-none"></div>
+            <div className="rounded-xl p-xl shadow-lg bg-sage-muted dark:bg-surface-container overflow-hidden border border-outline-variant/30 dark:border-white/5 relative h-full">
+              {/* Subtle design glows */}
+              <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
               
               <div className="relative z-10 space-y-lg">
-                <h3 className="text-headline-md font-headline-md font-semibold mb-xl flex items-center gap-sm text-sage-muted">
+                <h3 className="text-headline-md font-headline-md font-semibold mb-xl flex items-center gap-sm text-primary">
                   <span className="material-symbols-outlined">visibility</span>
                   Projected Impact
                 </h3>
 
                 {/* Reduction Metric */}
-                <div className="bg-white/10 dark:bg-black/20 rounded-lg p-lg border border-white/20 dark:border-white/5 backdrop-blur-sm">
-                  <p className="text-label-md font-label-md text-sage-muted uppercase tracking-wider mb-xs">Estimated Reduction</p>
+                <div className="bg-white/40 dark:bg-black/20 rounded-lg p-lg border border-primary/10 dark:border-white/5">
+                  <p className="text-label-md font-label-md text-primary/70 dark:text-sage-muted uppercase tracking-wider mb-xs">Estimated Reduction</p>
                   <div className="flex items-baseline gap-sm">
-                    <span className="text-display-lg font-display-lg font-bold text-secondary-fixed">
+                    <span className="text-display-lg font-display-lg font-bold text-primary dark:text-[#4edea3]">
                       {parseFloat(reductionTons) > 0 ? `-${reductionTons}` : reductionTons}
                     </span>
-                    <span className="text-body-lg font-body-lg text-white/80">tons CO₂e/yr</span>
+                    <span className="text-body-lg font-body-lg text-primary/80 dark:text-white/80">tons CO₂e/yr</span>
                   </div>
-                  <div className="mt-sm w-full bg-white/20 dark:bg-white/10 rounded-full h-2">
+                  <div className="mt-sm w-full bg-primary/10 dark:bg-white/10 rounded-full h-2">
                     <div 
-                      className="bg-secondary-fixed h-2 rounded-full transition-all duration-500" 
+                      className="bg-primary dark:bg-[#4edea3] h-2 rounded-full transition-all duration-500" 
                       style={{ width: `${barWidth}%` }}
                     ></div>
                   </div>
                 </div>
 
                 {/* Savings Metric */}
-                <div className="bg-white/10 dark:bg-black/20 rounded-lg p-lg border border-white/20 dark:border-white/5 backdrop-blur-sm">
-                  <p className="text-label-md font-label-md text-tertiary-fixed-dim uppercase tracking-wider mb-xs">Money Savings</p>
+                <div className="bg-white/40 dark:bg-black/20 rounded-lg p-lg border border-primary/10 dark:border-white/5">
+                  <p className="text-label-md font-label-md text-primary/70 dark:text-sage-muted uppercase tracking-wider mb-xs">Money Savings</p>
                   <div className="flex items-baseline gap-sm">
-                    <span className="text-display-lg font-display-lg font-bold text-tertiary-fixed-dim">
+                    <span className="text-display-lg font-display-lg font-bold text-secondary dark:text-[#c0c1ff]">
                       {moneySavings >= 0 ? `+$${moneySavings}` : `-$${Math.abs(moneySavings)}`}
                     </span>
-                    <span className="text-body-lg font-body-lg text-white/80">/yr</span>
+                    <span className="text-body-lg font-body-lg text-primary/80 dark:text-white/80">/yr</span>
                   </div>
-                  <p className="text-label-sm font-label-sm text-white/60 mt-xs flex items-center gap-xs">
-                    <span className="material-symbols-outlined text-[16px]">trending_up</span>
+                  <p className="text-label-sm font-label-sm text-primary/70 dark:text-white/60 mt-xs flex items-center gap-xs">
+                    <span className="material-symbols-outlined text-[16px] text-primary dark:text-[#4edea3]">trending_up</span>
                     {moneySavings >= 0 ? 'Positive financial impact' : 'Net investment required'}
                   </p>
                 </div>
 
                 {/* Eco Score Metric */}
-                <div className="bg-white/10 dark:bg-black/20 rounded-lg p-lg border border-white/20 dark:border-white/5 backdrop-blur-sm flex items-center justify-between">
+                <div className="bg-white/40 dark:bg-black/20 rounded-lg p-lg border border-primary/10 dark:border-white/5 flex items-center justify-between">
                   <div>
-                    <p className="text-label-md font-label-md text-sage-muted uppercase tracking-wider mb-xs">New Eco Score</p>
-                    <span className="text-headline-lg font-headline-lg font-bold text-white">{newScore}/100</span>
+                    <p className="text-label-md font-label-md text-primary/70 dark:text-sage-muted uppercase tracking-wider mb-xs">New Eco Score</p>
+                    <span className="text-headline-lg font-headline-lg font-bold text-primary dark:text-white">{newScore}/100</span>
                   </div>
-                  <div className="w-16 h-16 rounded-full border-4 border-secondary-fixed flex items-center justify-center bg-primary-container shrink-0">
-                    <span className="material-symbols-outlined text-secondary-fixed text-2xl">eco</span>
+                  <div className="w-16 h-16 rounded-full border-4 border-primary dark:border-[#4edea3] flex items-center justify-center bg-primary-container text-on-primary shrink-0">
+                    <span className="material-symbols-outlined text-on-primary text-2xl">eco</span>
                   </div>
                 </div>
 
-                <button className="w-full mt-xl py-md px-lg bg-secondary-fixed text-[#1000a9] rounded-lg text-label-md font-label-md font-bold hover:bg-primary-fixed transition-colors cursor-pointer text-center h-[48px] flex items-center justify-center border-none outline-none">
+                <button className="w-full mt-xl py-md px-lg bg-primary hover:bg-primary-container text-on-primary rounded-lg text-label-md font-label-md font-bold transition-colors cursor-pointer text-center h-[48px] flex items-center justify-center border-none outline-none">
                   Apply Changes to Plan
                 </button>
               </div>

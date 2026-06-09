@@ -1,4 +1,7 @@
 import React from 'react';
+import { motion } from 'framer-motion';
+import LineWaves from '../components/LineWaves/LineWaves';
+import { PlaceCard } from '@/components/ui/card-22';
 
 interface LandingPageProps {
   onCalculate: () => void;
@@ -6,6 +9,78 @@ interface LandingPageProps {
   hasProfile: boolean;
   onNavigateToView: (view: string) => void;
 }
+
+const FEATURED_STAYS = [
+  {
+    title: "Tiskita Jungle Lodge",
+    images: [
+      "https://images.unsplash.com/photo-1540553016722-983e48a2cd10?w=800&auto=format&fit=crop&q=60",
+      "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800&auto=format&fit=crop&q=60",
+      "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800&auto=format&fit=crop&q=60"
+    ],
+    tags: ["Carbon Neutral", "Solar Powered"],
+    rating: 4.9,
+    dateRange: "Oct 12 - 19",
+    hostType: "Superhost",
+    isTopRated: true,
+    description: "An off-grid biodiversity sanctuary powered entirely by local solar energy and hydro power, nestled deep in the tropical rainforest.",
+    pricePerNight: 145
+  },
+  {
+    title: "EcoDome Patagonia",
+    images: [
+      "https://images.unsplash.com/photo-1510312305653-8ed496efae75?w=800&auto=format&fit=crop&q=60",
+      "https://images.unsplash.com/photo-1502784444187-359ac186c5bb?w=800&auto=format&fit=crop&q=60",
+      "https://images.unsplash.com/photo-1449034446853-66c86144b0ad?w=800&auto=format&fit=crop&q=60"
+    ],
+    tags: ["Zero Waste", "Geothermal"],
+    rating: 4.8,
+    dateRange: "Nov 5 - 12",
+    hostType: "Eco-host",
+    isTopRated: false,
+    description: "Geodesic domes nestled in the wild Argentinian Patagonia. Offers zero-waste organic dining and self-contained geothermal heating.",
+    pricePerNight: 210
+  },
+  {
+    title: "Green Village Bamboo Villa",
+    images: [
+      "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=800&auto=format&fit=crop&q=60",
+      "https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=800&auto=format&fit=crop&q=60",
+      "https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=800&auto=format&fit=crop&q=60"
+    ],
+    tags: ["100% Bamboo", "Organic Farm"],
+    rating: 4.95,
+    dateRange: "Sep 20 - 27",
+    hostType: "Superhost",
+    isTopRated: true,
+    description: "Architectural masterpiece built fully of sustainable bamboo along the sacred Ayung River, featuring permaculture gardens.",
+    pricePerNight: 185
+  }
+];
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+      delayChildren: 0.1
+    }
+  }
+} as const;
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 30 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: 'spring',
+      stiffness: 100,
+      damping: 15
+    }
+  }
+} as const;
 
 export const LandingPage: React.FC<LandingPageProps> = ({
   onCalculate,
@@ -57,12 +132,22 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         {/* Hero Section */}
         <section className="relative pt-24 pb-32 px-margin-mobile md:px-margin-desktop overflow-hidden">
           <div className="absolute inset-0 z-0">
-            <img
-              alt="Misty ancient forest view from above"
-              className="w-full h-full object-cover opacity-20"
-              src="https://lh3.googleusercontent.com/aida/AP1WRLvLf5EDN_XWz6hB6wUzQ6uYIadD2bEFAbEOmD9Vv6LdBAw5p5rErt0zTZi7-oBOYmVxGFKNe3J6huS-jjeeJGQN94h7wEoJ2q-NGzH0JZYXP9zuLYOBOHeBST7VqSdW-kIuR_QZeE-L0_KQeGesk-EX5t-yc69Zv4LVLc-Z1JLHhdRnuSnK4uul3C9Jl6eI3SYxcY9uIZEvXnl9yZnY5Ihf2OYALISABY4CuYNKD1bWFIC3u4V1Tm-WLp_0"
+            <LineWaves
+              speed={0.3}
+              innerLineCount={32}
+              outerLineCount={36}
+              warpIntensity={1.0}
+              rotation={-45}
+              edgeFadeWidth={0.0}
+              colorCycleSpeed={1.0}
+              brightness={0.2}
+              color1="#012d1d"
+              color2="#10b981"
+              color3="#3e6750"
+              enableMouseInteraction={true}
+              mouseInfluence={2.0}
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background to-background"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background to-background"></div>
           </div>
           <div className="relative z-10 max-w-4xl mx-auto text-center space-y-lg">
             <div className="inline-flex items-center gap-sm px-4 py-2 bg-sage-muted dark:bg-[#1f2e24] text-primary rounded-full text-label-sm font-label-sm uppercase tracking-widest mb-md">
@@ -73,10 +158,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               Smarter Choices.<br />
               <span className="text-secondary">Lower Emissions.</span>
             </h1>
-            <p className="text-body-lg font-body-lg text-on-surface-variant max-w-2xl mx-auto mt-lg leading-relaxed">
+            <p className="text-body-lg font-body-lg text-on-surface-variant max-w-[672px] mx-auto mt-lg leading-relaxed">
               CarbWiser leverages advanced AI to provide precise, actionable insights for your carbon footprint. Navigate the complexities of environmental stewardship with clinical precision and organic simplicity.
             </p>
-            <div className="pt-xl flex flex-col sm:flex-row justify-center items-center gap-md max-w-lg mx-auto">
+            <div className="pt-xl flex flex-col sm:flex-row justify-center items-center gap-md max-w-[512px] mx-auto">
               <button
                 onClick={onCalculate}
                 className="bg-primary text-on-primary text-label-md font-label-md px-8 py-4 rounded-lg hover:bg-primary-container transition-all hover:shadow-[0_4px_12px_rgba(1,45,29,0.15)] w-full sm:w-auto h-[52px] flex items-center justify-center cursor-pointer"
@@ -142,7 +227,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <img
                   alt="Minimalist workspace showing analytics dashboard on laptop"
                   className="w-full h-full object-cover"
-                  src="https://lh3.googleusercontent.com/aida/AP1WRLv5_zk2x83aGtVKKAsJC13xNlxPETMvApWh11NLBbTUdrg1_5uQO2MgpVvLQgmgg1Boug0ojYcHWPdvODi8qZMbNGC7T6e-vZvdh5qR5g7nQBNDGflShKNxu7gEmzoaHDpHzPCiB8tYEisLd42NBGqumIKDs_It8GR4xw88w_y7wHIy1yQL7z152y2X2fOT_5vf7gb7BgSB_6D6MxVpBDq4_HBHqMw-lqD9RtJPBRFnv375GMb4ehm-K9SX"
+                  src="/workspace_dashboard_mockup.png"
                 />
               </div>
               <div className="order-1 lg:order-2 space-y-lg">
@@ -172,6 +257,41 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </div>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Featured Sustainable Eco-Stays */}
+        <section className="py-2xl px-margin-mobile md:px-margin-desktop bg-surface-container-low">
+          <div className="max-w-7xl mx-auto space-y-xl">
+            <div className="text-center max-w-2xl mx-auto space-y-sm">
+              <h2 className="text-headline-lg font-headline-lg text-primary font-bold">Featured Carbon-Certified Stays</h2>
+              <p className="text-body-md font-body-md text-on-surface-variant">
+                Explore beautiful, sustainable accommodations. Handpicked destinations with a commitment to low-emission operations.
+              </p>
+            </div>
+            <motion.div 
+              className="cards-grid"
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, margin: "-100px" }}
+            >
+              {FEATURED_STAYS.map((prop, idx) => (
+                <motion.div key={idx} variants={itemVariants}>
+                  <PlaceCard
+                    title={prop.title}
+                    images={prop.images}
+                    tags={prop.tags}
+                    rating={prop.rating}
+                    dateRange={prop.dateRange}
+                    hostType={prop.hostType}
+                    isTopRated={prop.isTopRated}
+                    description={prop.description}
+                    pricePerNight={prop.pricePerNight}
+                  />
+                </motion.div>
+              ))}
+            </motion.div>
           </div>
         </section>
       </main>

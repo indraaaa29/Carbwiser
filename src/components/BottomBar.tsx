@@ -12,12 +12,14 @@ export const BottomBar: React.FC<BottomBarProps> = ({ currentView, setView, them
         { id: 'overview', label: 'Overview', icon: 'dashboard' },
         { id: 'roadmap', label: 'Roadmap', icon: 'route' },
         { id: 'simulations', label: 'Simulate', icon: 'model_training' },
-        { id: 'ledger', label: 'Ledger', icon: 'account_balance_wallet' }
+        { id: 'ledger', label: 'Ledger', icon: 'account_balance_wallet' },
+        { id: 'stays', label: 'Eco Stays', icon: 'travel_explore' }
       ]
     : [
         { id: 'overview', label: 'Dashboard', icon: 'dashboard' },
         { id: 'roadmap', label: 'Roadmap', icon: 'alt_route' },
-        { id: 'simulations', label: 'Simulator', icon: 'analytics' }
+        { id: 'simulations', label: 'Simulator', icon: 'analytics' },
+        { id: 'stays', label: 'Eco Stays', icon: 'travel_explore' }
       ];
 
   return (
