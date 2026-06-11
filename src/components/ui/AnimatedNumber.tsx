@@ -11,16 +11,21 @@ export const AnimatedNumber = ({ value, duration = 1500, suffix = "" }: Animated
 
   useEffect(() => {
     let startTime: number | null = null;
+    let rafId: number;
+
     const step = (timestamp: number) => {
       if (!startTime) startTime = timestamp;
       const progress = Math.min((timestamp - startTime) / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
       setDisplayValue(Math.floor(eased * value));
       if (progress < 1) {
-        requestAnimationFrame(step);
+        rafId = requestAnimationFrame(step);
       }
     };
-    requestAnimationFrame(step);
+    
+    rafId = requestAnimationFrame(step);
+
+    return () => cancelAnimationFrame(rafId);
   }, [value, duration]);
 
   return (

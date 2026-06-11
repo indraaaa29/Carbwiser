@@ -1,6 +1,8 @@
 import { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { MotionConfig } from 'framer-motion';
 import { ProfileProvider } from './context/ProfileContext';
+import { ActionProvider } from './context/ActionContext';
 import RootLayout from './components/layout/RootLayout';
 
 const LazyLanding = lazy(() => import('./pages/LandingPage'));
@@ -21,8 +23,10 @@ function App() {
   return (
     <>
       <BrowserRouter>
-        <ProfileProvider>
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><span className="material-symbols-outlined animate-spin">autorenew</span></div>}>
+        <MotionConfig reducedMotion="user">
+          <ProfileProvider>
+            <ActionProvider>
+          <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><span className="material-symbols-outlined animate-spin">autorenew</span></div>}>
           <Routes>
             <Route element={<RootLayout />}>
               <Route path="/" element={<LazyLanding />} />
@@ -38,7 +42,9 @@ function App() {
             </Route>
           </Routes>
         </Suspense>
-        </ProfileProvider>
+            </ActionProvider>
+          </ProfileProvider>
+        </MotionConfig>
       </BrowserRouter>
       {import.meta.env.DEV && (
         <Suspense fallback={null}>

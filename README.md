@@ -21,13 +21,14 @@ CarbWiser solves this by providing a highly personalized, visually engaging, and
 
 ## ✨ Key Features
 
-* **Lifestyle Assessment**: A frictionless, 5-minute onboarding flow capturing daily travel, home energy usage, and food choices to establish a baseline footprint.
+* **Lifestyle Assessment**: A frictionless onboarding flow capturing daily travel, home energy usage, and food choices to establish a baseline footprint.
 * **Carbon Footprint Analysis**: High-resolution visualization breaking down emissions by category, providing absolute clarity on individual environmental impact.
-* **Carbon Hotspot Detection**: Automated identification of high-emission areas within a user's lifestyle, prioritizing areas with the highest potential for reduction.
-* **Smart Action Engine**: Context-aware, tailored recommendations (e.g., "Switch to a green energy tariff," "Adopt a plant-based diet twice a week") mapped to global emission reduction factors.
-* **Carbon Roadmap**: A structured, quarter-by-quarter action plan helping users achieve specific reduction targets systematically.
-* **What-If Simulator**: An interactive sandbox allowing users to model the impact of hypothetical lifestyle changes before committing to them.
-* **Progress Tracking**: A dynamic dashboard monitoring historical data against reduction targets to maintain momentum and celebrate milestones.
+* **Carbon Hotspot Detection**: Automated identification of high-emission areas, dynamically reflecting reductions based on real user actions.
+* **Smart Action Engine**: Context-aware, tailored recommendations mapped to global emission reduction factors.
+* **Action Commitment System**: A data-driven tracking engine where users commit to real actions, persisting securely in `localStorage`.
+* **Carbon Roadmap**: A transparent action plan automatically generated and updated strictly from user-committed actions, completely eliminating simulated metrics.
+* **What-If Simulator**: An interactive sandbox allowing users to model the impact of hypothetical lifestyle changes before committing.
+* **Progress Tracking**: A dynamic dashboard that calculates "Reduced So Far" and "Progress Percentage" purely from the sum of estimated reductions for committed actions.
 
 ---
 
@@ -35,8 +36,8 @@ CarbWiser solves this by providing a highly personalized, visually engaging, and
 1. **Onboard**: The user completes a streamlined Lifestyle Assessment.
 2. **Discover**: The user views their personalized Carbon Footprint Analysis and identifies Hotspots.
 3. **Simulate**: The user explores the What-If Simulator to see how different actions reduce their footprint.
-4. **Commit**: The user selects achievable goals from the Smart Action Engine, adding them to their Carbon Roadmap.
-5. **Track**: The user monitors their ongoing Progress Tracking dashboard, updating completed actions and watching their emissions drop.
+4. **Commit**: The user selects achievable goals from the Smart Action Engine and clicks "Commit Action", storing them securely in their local ActionContext.
+5. **Track**: The user monitors real, data-driven progress on their dashboard, where metrics and roadmaps are dynamically calculated strictly from their committed actions.
 
 ---
 
@@ -70,16 +71,19 @@ The Smart Action Engine prioritizes recommendations based on:
 
 ## 🏗️ Project Architecture
 CarbWiser follows a modular, component-driven architecture:
-* `src/components/`: Reusable UI components (e.g., Navbars, Cards, Animated Numbers).
+* `src/components/`: Reusable UI components (e.g., Navbars, Cards, Animated Numbers with strict memory-leak prevention).
 * `src/pages/`: Route-level components representing distinct views (Landing, Dashboard, Roadmap, Simulator).
+* `src/context/`: Global state management, specifically the `ActionContext` for synchronizing committed actions with `localStorage`.
+* `src/tests/`: Comprehensive test suites verifying logic and component rendering.
 * `src/lib/` or `src/utils/`: Helper functions, calculation logic, and shared constants.
 * `src/index.css`: Global styles, CSS variables, and custom animation keyframes.
 
-The application leverages React Hooks for local state management and intersection observers for scroll-triggered animations.
+The application leverages React Context for global state persistence and intersection observers for scroll-triggered animations.
 
 ---
 
 ## ♿ Accessibility Features
+* **Reduced Motion Support**: Comprehensive integration of `prefers-reduced-motion` to disable continuous or infinite animations (e.g., floating effects, blob animations) for sensitive users, preserving layout and visual quality.
 * **Semantic HTML**: Strict adherence to semantic HTML5 elements for proper screen reader parsing.
 * **Color Contrast**: Design system optimized for high contrast ratios, particularly in text and data visualization elements.
 * **Keyboard Navigation**: Interactive elements (buttons, links, form fields) are fully focusable and operable via keyboard.
@@ -106,8 +110,9 @@ The application leverages React Hooks for local state management and intersectio
 ---
 
 ## 🧪 Testing Strategy
-* **Unit Testing**: Core calculation utilities and isolated React components.
-* **Integration Testing**: Ensuring smooth data flow from the Assessment forms to the Dashboard visualization.
+* **Unit & Integration Testing**: Core calculation utilities, state management (`ActionContext`), and React components are heavily tested using `Vitest` and `@testing-library/react`.
+* **Coverage Reporting**: Configured with `@vitest/coverage-v8`, enforcing strict thresholds (Statements: 70%, Functions: 70%, Lines: 70%, Branches: 60%) to guarantee robust code quality.
+* **Memory & Performance Audits**: Automated and manual verification of requestAnimationFrame cleanups and resource management (e.g., ensuring zero memory leaks in `AnimatedNumber`).
 * **Manual QA**: Rigorous cross-browser testing and responsiveness checks across mobile, tablet, and desktop viewports.
 
 ---
@@ -166,7 +171,9 @@ Carbwiser/
 ├── public/                 # Static assets
 ├── src/
 │   ├── components/         # Reusable React components (UI, layout)
+│   ├── context/            # React Contexts (ActionContext)
 │   ├── pages/              # Main application views/routes
+│   ├── tests/              # Vitest specifications
 │   ├── App.tsx             # Root component & Routing
 │   ├── main.tsx            # Entry point
 │   └── index.css           # Global styles and Tailwind directives

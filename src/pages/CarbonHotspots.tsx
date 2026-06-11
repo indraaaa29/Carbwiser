@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useProfile } from '../context/ProfileContext';
+import { useActions } from '../context/ActionContext';
 import { calculateFootprint } from '../lib/carbonCalculation';
 
 // ─── Data ────────────────────────────────────────────────────────────────────
@@ -64,23 +65,6 @@ const CATEGORY_DEFS: Record<string, CategoryDef> = {
     actionIcon: 'restaurant',
   }
 };
-
-const initiatives = [
-  {
-    name: 'Use Public Transport 3x/week',
-    target: 'Target: -15% Transport Emissions',
-    progress: 45,
-    status: 'In Progress',
-    date: 'This Month',
-  },
-  {
-    name: 'Switch to Green Energy Tariff',
-    target: 'Target: -8% Home Emissions',
-    progress: 80,
-    status: 'Almost There',
-    date: 'This Week',
-  },
-];
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -158,6 +142,7 @@ const InsightPanel: React.FC<InsightPanelProps> = React.memo(({ insight, dark = 
 
 const CarbonHotspots: React.FC = () => {
   const { profile } = useProfile();
+  const { actions } = useActions();
   const metrics = useMemo(() => calculateFootprint(profile), [profile]);
 
   const { primaryHotspot, secondaryHotspots } = useMemo(() => {
@@ -325,26 +310,40 @@ const CarbonHotspots: React.FC = () => {
                 <span className="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
               </Link>
             </div>
-            <div className="space-y-6">
-              {initiatives.map((item) => (
-                <div key={item.name} className="group p-4 -mx-4 rounded-xl hover:bg-[#f2efe9]/50 transition-colors">
-                  <div className="flex justify-between items-baseline mb-3">
-                    <div className="font-geist text-xl font-medium text-[#003527]">{item.name}</div>
-                    <div className="font-geist text-xs text-[#404944] bg-white px-3 py-1 rounded-full border border-[#e2dec6]">{item.target}</div>
+            
+            {actions.length === 0 ? (
+              <div className="bg-[#f2efe9]/50 border border-[#e2dec6] rounded-xl p-8 text-center">
+                <p className="font-geist text-[#404944] mb-4">No actions committed yet.</p>
+                <Link to="/actions" className="inline-flex bg-[#003527] text-white px-6 py-2.5 rounded-lg font-geist text-sm font-medium hover:bg-[#064e3b] transition-colors">
+                  Explore Recommendations
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {actions.map((item) => (
+                  <div key={item.id} className="group p-4 -mx-4 rounded-xl hover:bg-[#f2efe9]/50 transition-colors">
+                    <div className="flex justify-between items-baseline mb-3">
+                      <div className="font-geist text-xl font-medium text-[#003527]">{item.title}</div>
+                      <div className="font-geist text-xs text-[#404944] bg-white px-3 py-1 rounded-full border border-[#e2dec6]">- {item.estimatedReduction} kg CO2e potential</div>
+                    </div>
+                    <div className="w-full bg-[#e2dec6] h-4 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-colors ${item.status === 'completed' ? 'bg-[#95d3ba]' : 'bg-[#003527] group-hover:bg-[#2b6954]'}`}
+                        style={{ width: item.status === 'completed' ? '100%' : '50%' }}
+                      />
+                    </div>
+                    <div className="flex justify-between mt-2">
+                      <span className="font-geist text-sm font-semibold text-[#2b6954]">
+                        {item.status === 'completed' ? 'Completed ✓' : 'In Progress'}
+                      </span>
+                      <span className="font-geist text-xs text-[#404944]">
+                        Committed: {new Date(item.committedAt).toLocaleDateString()}
+                      </span>
+                    </div>
                   </div>
-                  <div className="w-full bg-[#e2dec6] h-4 rounded-full overflow-hidden">
-                    <div
-                      className="bg-[#003527] h-full rounded-full group-hover:bg-[#2b6954] transition-colors"
-                      style={{ width: `${item.progress}%` }}
-                    />
-                  </div>
-                  <div className="flex justify-between mt-2">
-                    <span className="font-geist text-sm font-semibold text-[#2b6954]">{item.status}</span>
-                    <span className="font-geist text-xs text-[#404944]">{item.date}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
       </main>

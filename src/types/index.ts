@@ -69,3 +69,14 @@ export type NavLink = {
   label: string;
   active?: boolean;
 };
+
+export interface CommittedAction {
+  id: string;
+  title: string;
+  category: 'mobility' | 'energy' | 'waste' | 'food';
+  estimatedReduction: number; // in kg CO2e
+  difficulty: 'easy' | 'moderate' | 'hard';
+  committedAt: number; // timestamp
+  completedAt?: number; // timestamp
+  status: 'committed' | 'completed';
+}

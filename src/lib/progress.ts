@@ -1,40 +1,97 @@
 import type { CarbonMetrics } from './carbonCalculation';
+import type { CommittedAction } from '../types';
 
 export interface ProgressMetrics {
-  baseMonthly: number;
-  targetMonthly: number;
-  reducedSoFar: number;
-  monthlyData: {
-    month: string;
-    actual: number;
-    target: number;
-    height: string;
-    targetPct: string;
+  potentialReduction: number;
+  completedReduction: number;
+  progressPercentage: number;
+  goalsCompleted: number;
+  activeHabits: number;
+  journeyData: {
+    label: string;
+    potentialAccumulated: number;
+    completedAccumulated: number;
+    heightPotential: string;
+    heightCompleted: string;
   }[];
 }
 
-export function calculateProgressMetrics(metrics: CarbonMetrics): ProgressMetrics {
-  const baseMonthly = Math.round(metrics.total / 12);
-  const targetMonthly = Math.round((metrics.total - metrics.reductionGoalKg) / 12);
-  const reducedSoFar = Math.max(0, Math.round(metrics.reductionGoalKg * 0.3));
+export function calculateProgressMetrics(metrics: CarbonMetrics, actions: CommittedAction[]): ProgressMetrics {
+  let potentialReduction = 0;
+  let completedReduction = 0;
+  let activeHabits = 0;
+  let goalsCompleted = 0;
 
-  const monthlyData = [
-    { month: 'Jan', actual: Math.round(baseMonthly * 1.15), target: Math.round(baseMonthly * 1.1) },
-    { month: 'Feb', actual: Math.round(baseMonthly * 1.1), target: Math.round(baseMonthly * 1.05) },
-    { month: 'Mar', actual: Math.round(baseMonthly * 1.05), target: Math.round(baseMonthly * 1.0) },
-    { month: 'Apr', actual: Math.round(baseMonthly * 1.02), target: Math.round(targetMonthly * 1.15) },
-    { month: 'May', actual: Math.round(baseMonthly * 0.98), target: Math.round(targetMonthly * 1.05) },
-    { month: 'Jun', actual: baseMonthly, target: targetMonthly },
-  ].map((d) => ({
-    ...d,
-    height: `${Math.min(100, Math.round((d.actual / (baseMonthly * 1.2)) * 100))}%`,
-    targetPct: `${Math.min(100, Math.round((d.target / (baseMonthly * 1.2)) * 100))}%`,
-  }));
+  actions.forEach(a => {
+    if (a.status === 'completed') {
+      completedReduction += a.estimatedReduction;
+      goalsCompleted += 1;
+    } else if (a.status === 'committed') {
+      potentialReduction += a.estimatedReduction;
+      activeHabits += 1;
+    }
+  });
+
+  const progressPercentage = metrics.reductionGoalKg > 0 
+    ? Math.min(100, Math.round((completedReduction / metrics.reductionGoalKg) * 100))
+    : 0;
+
+  // Build Impact Commitment Journey chart data based on actual timestamps
+  type Event = { time: number; type: 'commit' | 'complete'; val: number };
+  const events: Event[] = [];
+  
+  actions.forEach(a => {
+    if (a.committedAt) events.push({ time: a.committedAt, type: 'commit', val: a.estimatedReduction });
+    if (a.completedAt) events.push({ time: a.completedAt, type: 'complete', val: a.estimatedReduction });
+  });
+  
+  events.sort((a, b) => a.time - b.time);
+  
+  let currentPotential = 0;
+  let currentCompleted = 0;
+  
+  const journeyDataMap = new Map<string, { potentialAccumulated: number, completedAccumulated: number }>();
+  
+  events.forEach(e => {
+    if (e.type === 'commit') {
+        currentPotential += e.val;
+    } else if (e.type === 'complete') {
+        currentPotential = Math.max(0, currentPotential - e.val); // Move from potential to completed
+        currentCompleted += e.val;
+    }
+    
+    const dateStr = new Date(e.time).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    journeyDataMap.set(dateStr, { potentialAccumulated: currentPotential, completedAccumulated: currentCompleted });
+  });
+
+  const journeyData = Array.from(journeyDataMap.entries()).map(([label, data]) => {
+    const totalMax = Math.max(metrics.reductionGoalKg, currentPotential + currentCompleted, 1);
+    return {
+      label,
+      potentialAccumulated: data.potentialAccumulated,
+      completedAccumulated: data.completedAccumulated,
+      heightPotential: `${Math.min(100, Math.round((data.potentialAccumulated / totalMax) * 100))}%`,
+      heightCompleted: `${Math.min(100, Math.round((data.completedAccumulated / totalMax) * 100))}%`,
+    };
+  });
+
+  // Flat baseline if no actions taken yet
+  if (journeyData.length === 0) {
+    journeyData.push({
+      label: 'Today',
+      potentialAccumulated: 0,
+      completedAccumulated: 0,
+      heightPotential: '0%',
+      heightCompleted: '0%'
+    });
+  }
 
   return {
-    baseMonthly,
-    targetMonthly,
-    reducedSoFar,
-    monthlyData,
+    potentialReduction,
+    completedReduction,
+    progressPercentage,
+    goalsCompleted,
+    activeHabits,
+    journeyData,
   };
 }
