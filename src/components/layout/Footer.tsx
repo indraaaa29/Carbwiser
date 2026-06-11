@@ -22,22 +22,25 @@ const Footer: React.FC<FooterProps> = ({ variant = 'light' }) => {
             CarbWiser
           </span>
           <span className={`font-inter text-sm text-center md:text-left max-w-sm ${isDark ? 'text-[#95d3ba]' : 'text-[#404944]'}`}>
-            © 2024 CarbWiser. Pragmatic solutions for a sustainable future, rooted in data.
+            © 2025 CarbWiser. Helping individuals understand and reduce their carbon footprint.
           </span>
         </div>
 
-        <nav className="flex flex-wrap justify-center md:justify-end gap-x-8 gap-y-3">
-          {['Privacy Policy', 'Methodology', 'Support', 'Terms of Service'].map((item) => (
-            <Link
-              key={item}
-              to="#"
-              className={`font-inter text-sm transition-colors duration-200 hover:underline ${
-                isDark ? 'text-[#95d3ba] hover:text-white' : 'text-[#404944] hover:text-[#003527]'
-              }`}
-            >
-              {item}
-            </Link>
-          ))}
+        <nav aria-label="Footer navigation" className="flex flex-wrap justify-center md:justify-end gap-x-8 gap-y-3">
+          {['Privacy Policy', 'Methodology', 'Support', 'Terms of Service'].map((item) => {
+            const href = item === 'Methodology' ? '/methodology' : '#';
+            return (
+              <Link
+                key={item}
+                to={href}
+                className={`font-inter text-sm transition-colors duration-200 hover:underline ${
+                  isDark ? 'text-[#95d3ba] hover:text-white' : 'text-[#404944] hover:text-[#003527]'
+                }`}
+              >
+                {item}
+              </Link>
+            );
+          })}
         </nav>
       </div>
     </footer>

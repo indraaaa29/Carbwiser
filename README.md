@@ -1,73 +1,190 @@
-# React + TypeScript + Vite
+# CarbWiser
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Smarter Choices. Lower Emissions.**
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 📖 Project Overview
+CarbWiser is a modern, responsive web application designed to empower individuals to understand, track, and actively reduce their personal carbon footprint. By translating complex environmental data into actionable, bite-sized insights, CarbWiser removes the friction from adopting a sustainable lifestyle.
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🎯 Problem Statement
+Despite growing climate awareness, individuals often struggle to quantify their personal environmental impact or know where to begin reducing it. Traditional carbon calculators are often overly complex, corporate-focused, or fail to provide actionable, realistic steps for everyday life. There is a critical need for a tool that bridges the gap between raw data and practical, personalized sustainability.
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 💡 Solution Overview
+CarbWiser solves this by providing a highly personalized, visually engaging, and intuitive platform that tracks individual carbon emissions across key lifestyle areas (Transportation, Home Energy, Food & Lifestyle). It leverages a localized recommendation engine to suggest impactful, manageable changes, allowing users to model potential outcomes, set goals, and track progress over time.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## ✨ Key Features
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+* **Lifestyle Assessment**: A frictionless, 5-minute onboarding flow capturing daily travel, home energy usage, and food choices to establish a baseline footprint.
+* **Carbon Footprint Analysis**: High-resolution visualization breaking down emissions by category, providing absolute clarity on individual environmental impact.
+* **Carbon Hotspot Detection**: Automated identification of high-emission areas within a user's lifestyle, prioritizing areas with the highest potential for reduction.
+* **Smart Action Engine**: Context-aware, tailored recommendations (e.g., "Switch to a green energy tariff," "Adopt a plant-based diet twice a week") mapped to global emission reduction factors.
+* **Carbon Roadmap**: A structured, quarter-by-quarter action plan helping users achieve specific reduction targets systematically.
+* **What-If Simulator**: An interactive sandbox allowing users to model the impact of hypothetical lifestyle changes before committing to them.
+* **Progress Tracking**: A dynamic dashboard monitoring historical data against reduction targets to maintain momentum and celebrate milestones.
+
+---
+
+## 🗺️ User Journey
+1. **Onboard**: The user completes a streamlined Lifestyle Assessment.
+2. **Discover**: The user views their personalized Carbon Footprint Analysis and identifies Hotspots.
+3. **Simulate**: The user explores the What-If Simulator to see how different actions reduce their footprint.
+4. **Commit**: The user selects achievable goals from the Smart Action Engine, adding them to their Carbon Roadmap.
+5. **Track**: The user monitors their ongoing Progress Tracking dashboard, updating completed actions and watching their emissions drop.
+
+---
+
+## 🧮 Carbon Calculation Methodology
+CarbWiser calculates emissions based on standard conversion factors (e.g., EPA, DEFRA) adapted for individual consumer behaviors. 
+* **Transportation**: Calculations consider vehicle type, fuel efficiency, mileage, and public transit usage.
+* **Home Energy**: Calculations evaluate grid reliance, regional energy mix, and household efficiency.
+* **Food & Lifestyle**: Calculations factor in diet type (e.g., vegan, omnivore), local sourcing, and general consumption patterns.
+*(Note: Current calculations utilize robust placeholder logic designed for easy integration with live environmental APIs).*
+
+---
+
+## 🧠 Recommendation Engine Logic
+The Smart Action Engine prioritizes recommendations based on:
+1. **Impact Potential**: Actions that yield the highest CO2e reduction for the specific user's hotspots.
+2. **Feasibility**: Balancing high-impact changes with smaller, habit-forming actions to ensure sustained engagement.
+3. **User Context**: Filtering out irrelevant actions (e.g., not recommending "install solar" to an apartment renter).
+
+---
+
+## 🛠️ Technology Stack
+* **Frontend Framework**: React 18
+* **Language**: TypeScript
+* **Build Tool**: Vite
+* **Styling**: Tailwind CSS (with arbitrary value support and custom design tokens)
+* **Animations**: Framer Motion & CSS Keyframes
+* **Icons**: Google Material Symbols
+* **Routing**: React Router DOM
+
+---
+
+## 🏗️ Project Architecture
+CarbWiser follows a modular, component-driven architecture:
+* `src/components/`: Reusable UI components (e.g., Navbars, Cards, Animated Numbers).
+* `src/pages/`: Route-level components representing distinct views (Landing, Dashboard, Roadmap, Simulator).
+* `src/lib/` or `src/utils/`: Helper functions, calculation logic, and shared constants.
+* `src/index.css`: Global styles, CSS variables, and custom animation keyframes.
+
+The application leverages React Hooks for local state management and intersection observers for scroll-triggered animations.
+
+---
+
+## ♿ Accessibility Features
+* **Semantic HTML**: Strict adherence to semantic HTML5 elements for proper screen reader parsing.
+* **Color Contrast**: Design system optimized for high contrast ratios, particularly in text and data visualization elements.
+* **Keyboard Navigation**: Interactive elements (buttons, links, form fields) are fully focusable and operable via keyboard.
+* **ARIA Attributes**: Strategic use of ARIA labels and roles to provide context for dynamic content and complex UI components.
+
+---
+
+## 🔒 Security Features
+* **Input validation**: All user inputs in assessment forms and simulator are validated for type, range, and format before processing.
+* **Defensive programming**: Runtime checks and fallback handling across calculation and recommendation logic prevent unexpected crashes.
+* **Type-safe calculations**: Full TypeScript coverage ensures numeric operations and data transformations are type-checked at compile time.
+* **Environment variable protection**: Third-party API keys and configuration secrets are managed via Vite's `.env` system, excluded from version control.
+* **Local-only data processing**: All footprint calculations, recommendations, and user data processing occur entirely client-side; no data is transmitted to external servers.
+* **No sensitive data storage**: The application does not persist personally identifiable information (PII), authentication credentials, or financial data.
+
+---
+
+## ⚡ Performance Optimizations
+* **Vite Build System**: Extremely fast HMR during development and highly optimized Rollup builds for production.
+* **Asset Optimization**: Use of efficient web formats for images and SVGs.
+* **Animation Performance**: Hardware-accelerated CSS animations (`transform`, `opacity`) utilized over computationally expensive property changes.
+* **Lazy Loading**: Prepared architecture for route-based code splitting.
+
+---
+
+## 🧪 Testing Strategy
+* **Unit Testing**: Core calculation utilities and isolated React components.
+* **Integration Testing**: Ensuring smooth data flow from the Assessment forms to the Dashboard visualization.
+* **Manual QA**: Rigorous cross-browser testing and responsiveness checks across mobile, tablet, and desktop viewports.
+
+---
+
+## 🔮 Assumptions
+* Users have a general understanding of their daily habits (e.g., approximate miles driven, general diet type).
+* The target demographic has access to modern web browsers supporting ES6+ and CSS Grid/Flexbox.
+* The application runs primarily on client-side state for the purpose of this prototype.
+
+---
+
+## 🚀 Future Scope
+* **Backend Integration**: Implement a robust Node.js/PostgreSQL backend for persistent user profiles and historical data tracking.
+* **Live API Connections**: Integrate with live utility APIs and smart home devices for automated data ingestion.
+* **Community Features**: Implement leaderboards, community challenges, and social sharing to boost engagement.
+* **Mobile Application**: Wrap the PWA into native iOS and Android applications.
+
+---
+
+## 💻 Installation Guide
+
+### Prerequisites
+* Node.js (v18 or higher recommended)
+* npm (v9 or higher)
+
+### Steps
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd Carbwiser
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+---
+
+## 🏃 Local Development
+To start the development server with Hot Module Replacement (HMR):
+```bash
+npm run dev
+```
+The application will be available at `http://localhost:5173`.
+
+To build the project for production:
+```bash
+npm run build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 📁 Project Structure
+```text
+Carbwiser/
+├── public/                 # Static assets
+├── src/
+│   ├── components/         # Reusable React components (UI, layout)
+│   ├── pages/              # Main application views/routes
+│   ├── App.tsx             # Root component & Routing
+│   ├── main.tsx            # Entry point
+│   └── index.css           # Global styles and Tailwind directives
+├── package.json            # Dependencies and scripts
+├── vite.config.ts          # Vite bundler configuration
+└── README.md               # Project documentation
 ```
+
+---
+
+## 📸 Screenshots Section
+*(Note: Replace with actual screenshot links in production)*
+* **Landing Page**: Showcasing the dynamic hero section and core value proposition.
+* **Assessment Flow**: Demonstrating the frictionless data entry.
+* **Dashboard/Overview**: Highlighting the data visualization and hot-spot detection.
+* **What-If Simulator**: Displaying the interactive sliding scales and projected impact.
+
+---
+
+## 🏁 Conclusion
+CarbWiser represents a paradigm shift in personal environmental responsibility. By combining enterprise-grade data visualization with intuitive, consumer-friendly design, it transforms the daunting task of carbon reduction into an engaging, manageable, and rewarding journey. Built with performance, accessibility, and scalability in mind, CarbWiser is ready to make a tangible impact.

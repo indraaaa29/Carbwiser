@@ -1,31 +1,50 @@
+import { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { Agentation } from 'agentation';
-import LandingPage from './pages/LandingPage';
-import LifestyleAssessment from './pages/LifestyleAssessment';
-import FootprintOverview from './pages/FootprintOverview';
-import SmartActions from './pages/SmartActions';
-import CarbonHotspots from './pages/CarbonHotspots';
-import CarbonRoadmap from './pages/CarbonRoadmap';
-import WhatIfSimulator from './pages/WhatIfSimulator';
-import ProgressTracking from './pages/ProgressTracking';
+import { ProfileProvider } from './context/ProfileContext';
+import RootLayout from './components/layout/RootLayout';
+
+const LazyLanding = lazy(() => import('./pages/LandingPage'));
+const LazyAssessment = lazy(() => import('./pages/LifestyleAssessment'));
+const LazyOverview = lazy(() => import('./pages/FootprintOverview'));
+const LazySmartActions = lazy(() => import('./pages/SmartActions'));
+const LazyHotspots = lazy(() => import('./pages/CarbonHotspots'));
+const LazyRoadmap = lazy(() => import('./pages/CarbonRoadmap'));
+const LazySimulator = lazy(() => import('./pages/WhatIfSimulator'));
+const LazyTracking = lazy(() => import('./pages/ProgressTracking'));
+const LazyMethodology = lazy(() => import('./pages/Methodology'));
+
+const LazyAgentation = lazy(() =>
+  import('agentation').then((mod) => ({ default: mod.Agentation }))
+);
 
 function App() {
   return (
     <>
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/assessment" element={<LifestyleAssessment />} />
-          <Route path="/overview" element={<FootprintOverview />} />
-          <Route path="/actions" element={<SmartActions />} />
-          <Route path="/hotspots" element={<CarbonHotspots />} />
-          <Route path="/roadmap" element={<CarbonRoadmap />} />
-          <Route path="/simulator" element={<WhatIfSimulator />} />
-          <Route path="/tracking" element={<ProgressTracking />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <ProfileProvider>
+        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><span className="material-symbols-outlined animate-spin">autorenew</span></div>}>
+          <Routes>
+            <Route element={<RootLayout />}>
+              <Route path="/" element={<LazyLanding />} />
+              <Route path="/assessment" element={<LazyAssessment />} />
+              <Route path="/overview" element={<LazyOverview />} />
+              <Route path="/actions" element={<LazySmartActions />} />
+              <Route path="/hotspots" element={<LazyHotspots />} />
+              <Route path="/roadmap" element={<LazyRoadmap />} />
+              <Route path="/simulator" element={<LazySimulator />} />
+              <Route path="/tracking" element={<LazyTracking />} />
+              <Route path="/methodology" element={<LazyMethodology />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Route>
+          </Routes>
+        </Suspense>
+        </ProfileProvider>
       </BrowserRouter>
-      {import.meta.env.DEV && <Agentation />}
+      {import.meta.env.DEV && (
+        <Suspense fallback={null}>
+          <LazyAgentation />
+        </Suspense>
+      )}
     </>
   );
 }

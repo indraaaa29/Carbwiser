@@ -1,71 +1,70 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import Navbar from '../components/layout/Navbar';
-import Footer from '../components/layout/Footer';
+import { useProfile } from '../context/ProfileContext';
+import { generateRecommendations } from '../lib/recommendationEngine';
+import { calculateFootprint } from '../lib/carbonCalculation';
+import { calculateProgressMetrics } from '../lib/progress';
+import { AnimatedNumber } from '../components/ui/AnimatedNumber';
+import type { Recommendation } from '../lib/recommendationEngine';
 
-interface AnimatedNumberProps {
-  value: number;
-  duration?: number;
-  suffix?: string;
-}
-
-const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
-  value,
-  duration = 1500,
-  suffix = "",
-}) => {
-  const [displayValue, setDisplayValue] = React.useState(0);
-
-  React.useEffect(() => {
-    let startTime: number | null = null;
-    const step = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
-      setDisplayValue(Math.floor(eased * value));
-      if (progress < 1) {
-        requestAnimationFrame(step);
-      }
-    };
-    requestAnimationFrame(step);
-  }, [value, duration]);
-
-  return (
-    <span>
-      {displayValue.toLocaleString()}
-      {suffix}
-    </span>
-  );
+const CATEGORY_META: Record<string, { icon: string; iconBg: string; iconColor: string; location: string }> = {
+  mobility: { icon: 'directions_car', iconBg: 'bg-[#d4e3ff]', iconColor: 'text-[#001c39]', location: 'Transport' },
+  energy: { icon: 'bolt', iconBg: 'bg-[#d9e6dd]', iconColor: 'text-[#131e19]', location: 'Home Energy' },
+  waste: { icon: 'compost', iconBg: 'bg-[#e1e8fd]', iconColor: 'text-[#003c70]', location: 'Food & Diet' },
 };
 
-const monthlyData = [
-  { month: 'Jan', actual: 85, target: 80, height: '85%', targetTop: '20%' },
-  { month: 'Feb', actual: 72, target: 75, height: '72%', targetTop: '25%' },
-  { month: 'Mar', actual: 65, target: 70, height: '65%', targetTop: '30%' },
-  { month: 'Apr', actual: 68, target: 65, height: '68%', targetTop: '35%' },
-  { month: 'May', actual: 55, target: 60, height: '55%', targetTop: '40%' },
-  { month: 'Jun', actual: 50, target: 55, height: '50%', targetTop: '45%' },
-];
+function toInitiative(rec: Recommendation) {
+  const meta = CATEGORY_META[rec.category] ?? CATEGORY_META.waste;
+  return {
+    icon: meta.icon,
+    iconBg: meta.iconBg,
+    iconColor: meta.iconColor,
+    title: rec.title,
+    location: meta.location,
+  };
+}
 
-const initiatives = [
-  { icon: 'solar_power', iconBg: 'bg-[#d4e3ff]', iconColor: 'text-[#001c39]', title: 'Solar Array Phase 2', location: 'Facility A' },
-  { icon: 'local_shipping', iconBg: 'bg-[#d9e6dd]', iconColor: 'text-[#131e19]', title: 'Fleet Electrification', location: 'Logistics Hub' },
-  { icon: 'wind_power', iconBg: 'bg-[#e1e8fd]', iconColor: 'text-[#003c70]', title: 'Wind Power PPA', location: 'Facility B' },
-];
-
-const roadmapItems = [
-  { label: 'Supply Chain Audit', date: 'Completed Jul 15', status: 'done' },
-  { label: 'HVAC Optimization', date: 'Completed Aug 02', status: 'done' },
-  { label: 'Fleet Transition Ph 1', date: 'In Progress - 60%', progress: 60, status: 'active' },
-  { label: 'Renewable Energy RFP', date: 'Scheduled Sep 10', status: 'pending' },
-];
+function toRoadmapItem(rec: Recommendation, index: number) {
+  const isActive = index < 2;
+  const isDone = index === 0;
+  return {
+    label: rec.title,
+    date: isDone
+      ? 'Completed'
+      : isActive
+        ? `In Progress - ${60 - index * 20}%`
+        : 'Scheduled',
+    progress: isActive ? 60 - index * 20 : undefined,
+    status: isDone ? 'done' as const : isActive ? 'active' as const : 'pending' as const,
+  };
+}
 
 const ProgressTracking: React.FC = () => {
+  const { profile } = useProfile();
+  const metrics = useMemo(() => calculateFootprint(profile), [profile]);
+
+  const progress = useMemo(() => calculateProgressMetrics(metrics), [metrics]);
+  const { reducedSoFar, monthlyData, baseMonthly } = progress;
+
+  const recommendations = useMemo(() => generateRecommendations(profile), [profile]);
+
+  const initiatives = useMemo(() => recommendations.slice(0, 3).map(toInitiative), [recommendations]);
+  const roadmapItems = useMemo(() => recommendations.slice(0, 4).map(toRoadmapItem), [recommendations]);
+
+  const goalsCompleted = useMemo(() => {
+    const pct = Math.min(1, Math.max(0, reducedSoFar / Math.max(1, metrics.reductionGoalKg)));
+    return { completed: Math.round(pct * 20), total: 20, percent: Math.round(pct * 100) };
+  }, [reducedSoFar, metrics.reductionGoalKg]);
+
+  const vsLastYear = useMemo(() => {
+    const prev = Math.round(baseMonthly * 1.12 * 12);
+    const curr = metrics.total;
+    return Math.round(((prev - curr) / prev) * 100);
+  }, [baseMonthly, metrics.total]);
+
   return (
     <div className="bg-[#f9f9ff] text-[#141b2b] min-h-screen flex flex-col font-inter">
-      <Navbar />
-
       <main className="flex-grow w-full max-w-[1440px] mx-auto px-4 md:px-10 py-8">
         {/* Hero Section */}
         <section className="mb-8 rounded-2xl overflow-hidden relative min-h-[400px] flex items-center shadow-lg border border-[#bfc9c3]">
@@ -77,10 +76,10 @@ const ProgressTracking: React.FC = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-[#003527]/90 via-[#003527]/70 to-transparent z-10" />
 
           <div className="relative z-20 p-8 md:p-16 max-w-3xl">
-            <h1 className="font-geist text-3xl md:text-5xl font-semibold text-white mb-4">Progress Tracking</h1>
-            <p className="font-inter text-lg text-[#80bea6] max-w-2xl mb-8 leading-7">
-              Monitor your historical data and current velocity towards operational sustainability goals. Every step is a seed planted for our future.
-            </p>
+              <h1 className="font-geist text-3xl md:text-5xl font-semibold text-white mb-4">Progress Tracking</h1>
+              <p className="font-inter text-lg text-[#80bea6] max-w-2xl mb-8 leading-7">
+                See how your daily choices are adding up. Track your personal carbon reduction over time and stay on course toward your goals.
+              </p>
 
             {/* Hero Metric */}
             <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-5 inline-block">
@@ -90,14 +89,14 @@ const ProgressTracking: React.FC = () => {
               </div>
               <div className="flex items-baseline gap-2">
                 <span className="font-geist text-5xl font-semibold text-white">
-                  <AnimatedNumber value={2450} />
+                  <AnimatedNumber value={reducedSoFar} />
                 </span>
-                <span className="font-inter text-base text-[#80bea6]">tCO2e</span>
+                <span className="font-inter text-base text-[#80bea6]">kg CO2e</span>
               </div>
               <div className="mt-2 flex items-center gap-1">
                 <div className="bg-[#b0f0d6]/20 rounded-xl px-2 py-0.5 flex items-center gap-1 backdrop-blur-sm border border-[#b0f0d6]/30">
                   <span className="material-symbols-outlined text-[14px] text-[#b0f0d6]" style={{ fontVariationSettings: "'FILL' 0" }}>trending_down</span>
-                  <span className="font-geist text-xs text-[#b0f0d6]">-12% vs last year</span>
+                  <span className="font-geist text-xs text-[#b0f0d6]">-{vsLastYear}% vs last year</span>
                 </div>
               </div>
             </div>
@@ -120,14 +119,14 @@ const ProgressTracking: React.FC = () => {
               <div className="relative z-10">
                 <div className="flex items-baseline gap-2 mb-4">
                   <span className="font-geist text-5xl font-semibold text-[#003527]">
-                    <AnimatedNumber value={14} />
+                    <AnimatedNumber value={goalsCompleted.completed} />
                   </span>
-                  <span className="font-inter text-base text-[#404944]">of 20 milestones reached</span>
+                  <span className="font-inter text-base text-[#404944]">of {goalsCompleted.total} milestones reached</span>
                 </div>
                 <div className="w-full bg-[#dce2f7] rounded-full h-3 overflow-hidden relative">
                   <motion.div
                     initial={{ width: 0 }}
-                    animate={{ width: '70%' }}
+                    animate={{ width: `${goalsCompleted.percent}%` }}
                     transition={{ duration: 1.2, ease: "easeOut" }}
                     className="bg-gradient-to-r from-[#003527] to-[#95d3ba] h-full rounded-full relative"
                   >
@@ -143,19 +142,19 @@ const ProgressTracking: React.FC = () => {
                     />
                   </motion.div>
                 </div>
-                <p className="font-geist text-sm text-[#404944] mt-2">70% to yearly target</p>
+                <p className="font-geist text-sm text-[#404944] mt-2">{goalsCompleted.percent}% to yearly target</p>
               </div>
             </article>
 
             {/* Active Initiatives */}
             <article className="bg-white rounded-2xl border border-[#bfc9c3] p-6 shadow-sm flex-grow">
-              <div className="mb-4 flex justify-between items-end">
+                <div className="mb-4 flex justify-between items-end">
                 <div>
-                  <h2 className="font-geist text-2xl font-medium text-[#141b2b]">Active Initiatives</h2>
-                  <p className="font-inter text-sm text-[#404944] mt-1">Driving change across 3 facilities.</p>
+                  <h2 className="font-geist text-2xl font-medium text-[#141b2b]">Active Habits</h2>
+                  <p className="font-inter text-sm text-[#404944] mt-1">Changes you're making across your lifestyle.</p>
                 </div>
                 <span className="font-geist text-4xl font-semibold text-[#003527]">
-                  <AnimatedNumber value={6} />
+                  <AnimatedNumber value={initiatives.length} />
                 </span>
               </div>
               <ul className="space-y-2 mt-4">
@@ -189,8 +188,8 @@ const ProgressTracking: React.FC = () => {
 
               <div className="flex justify-between items-end mb-6 relative z-10">
                 <div>
-                  <h2 className="font-geist text-2xl font-medium text-[#141b2b]">Monthly Impact Profile</h2>
-                  <p className="font-inter text-sm text-[#404944] mt-1">Carbon reduction velocity over the last 6 months.</p>
+                  <h2 className="font-geist text-2xl font-medium text-[#141b2b]">Monthly Emissions Profile</h2>
+                  <p className="font-inter text-sm text-[#404944] mt-1">Your personal carbon reduction over the last 6 months.</p>
                 </div>
                 {/* Legend */}
                 <div className="hidden sm:flex items-center gap-4">
@@ -216,24 +215,32 @@ const ProgressTracking: React.FC = () => {
 
                 {monthlyData.map((d) => (
                   <div key={d.month} className="relative z-10 flex flex-col justify-end w-full group">
-                    <div className="w-full flex justify-center items-end h-[200px] relative">
-                      {/* Target Line */}
-                      <div
-                        className="absolute w-full border-t-2 border-[#bfc9c3]/40"
-                        style={{ top: d.targetTop }}
-                        title={`Target: ${d.target}`}
-                      />
+                    <div className="w-full flex justify-center items-end h-[200px] gap-1 relative">
                       {/* Actual Bar */}
                       <motion.div
                         initial={{ height: 0 }}
                         animate={{ height: d.height }}
-                        transition={{ duration: 1.5, ease: "easeOut", delay: 0.1 }}
-                        className="w-full max-w-[40px] bg-gradient-to-t from-[#003527] to-[#95d3ba] hover:to-[#b0f0d6] transition-colors rounded-t-lg shadow-md relative group cursor-pointer"
+                        transition={{ duration: 1.2, ease: "easeOut" }}
+                        className="w-4 bg-gradient-to-t from-[#003527] to-[#2b6954] hover:to-[#95d3ba] rounded-t-sm shadow-sm relative group z-10 cursor-pointer"
                         title={`Actual: ${d.actual}`}
                       >
-                        {/* Tooltip */}
+                        {/* Tooltip for Actual */}
                         <div className="opacity-0 group-hover:opacity-100 absolute -top-10 left-1/2 -translate-x-1/2 bg-[#293040] text-[#edf0ff] text-xs py-1.5 px-2.5 rounded-lg whitespace-nowrap transition-opacity shadow-lg z-20 pointer-events-none">
-                          {d.actual} tCO2e
+                          Actual: {d.actual} tCO2e
+                        </div>
+                      </motion.div>
+
+                      {/* Target Bar */}
+                      <motion.div
+                        initial={{ height: 0 }}
+                        animate={{ height: d.targetPct }}
+                        transition={{ duration: 1.2, ease: "easeOut", delay: 0.1 }}
+                        className="w-4 bg-[#e9edff] border border-[#bfc9c3]/60 hover:bg-[#dce2f7] rounded-t-sm relative group cursor-pointer"
+                        title={`Target: ${d.target}`}
+                      >
+                        {/* Tooltip for Target */}
+                        <div className="opacity-0 group-hover:opacity-100 absolute -top-10 left-1/2 -translate-x-1/2 bg-[#293040] text-[#edf0ff] text-xs py-1.5 px-2.5 rounded-lg whitespace-nowrap transition-opacity shadow-lg z-20 pointer-events-none">
+                          Target: {d.target} tCO2e
                         </div>
                       </motion.div>
                     </div>
@@ -247,8 +254,8 @@ const ProgressTracking: React.FC = () => {
             <article className="bg-white rounded-2xl border border-[#bfc9c3] p-6 flex flex-col shadow-sm">
               <div className="mb-4 flex justify-between items-center border-b border-[#bfc9c3] pb-4">
                 <div>
-                  <h2 className="font-geist text-2xl font-medium text-[#141b2b]">Roadmap Status</h2>
-                  <p className="font-inter text-sm text-[#404944] mt-1">Key milestones for Q3.</p>
+                  <h2 className="font-geist text-2xl font-medium text-[#141b2b]">My Action Plan</h2>
+                  <p className="font-inter text-sm text-[#404944] mt-1">Key personal goals for this quarter.</p>
                 </div>
                 <Link to="/roadmap" className="font-geist text-sm font-medium text-[#003527] hover:underline">View Full Roadmap</Link>
               </div>
@@ -302,8 +309,6 @@ const ProgressTracking: React.FC = () => {
           </div>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 };

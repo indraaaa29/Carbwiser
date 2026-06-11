@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '../components/layout/Navbar';
-import Footer from '../components/layout/Footer';
+
 
 /* ─── Animated counter hook ─── */
 function useCountUp(target: number, duration = 1800, start = false) {
@@ -46,9 +45,9 @@ const bars = [
 ];
 
 const methodologySteps = [
-  { icon: 'hub',        step: '1. Continuous Ingestion', desc: 'Connect ERPs, utility providers, and travel platforms via our secure, organic API layer. Data flows effortlessly.' },
-  { icon: 'filter_alt', step: '2. Intelligent Mapping',  desc: 'Machine learning models synthesize raw data, categorizing impact across direct operations and supply chains.' },
-  { icon: 'visibility', step: '3. Actionable Clarity',   desc: 'Identify emission hotspots through high-resolution visualization and implement targeted reduction initiatives.' },
+  { icon: 'hub',        step: '1. Share Your Habits', desc: 'Tell us about your daily travel, home energy use, and food choices. A quick 5-minute lifestyle snapshot.' },
+  { icon: 'filter_alt', step: '2. Understand Your Impact',  desc: 'We break down your personal footprint across all categories so you can see exactly where you can make a difference.' },
+  { icon: 'visibility', step: '3. Take Action',   desc: 'Get personalised, practical suggestions that fit your lifestyle — from small daily habits to bigger meaningful changes.' },
 ];
 
 const LandingPage: React.FC = () => {
@@ -59,6 +58,7 @@ const LandingPage: React.FC = () => {
   const counterVal = useCountUp(24592, 1800, cardInView);
   const formatted = counterVal.toLocaleString();
 
+
   /* ── methodology section ── */
   const { ref: howRef, inView: howInView } = useInView(0.15);
 
@@ -67,7 +67,6 @@ const LandingPage: React.FC = () => {
 
   return (
     <div className="bg-[#f9f9ff] text-[#141b2b] min-h-screen flex flex-col font-inter">
-      <Navbar />
 
       <main className="flex-grow">
 
@@ -115,7 +114,7 @@ const LandingPage: React.FC = () => {
                 style={{ animation: 'fadeSlideUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.1s both' }}
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-[#2b6954]" />
-                <span className="font-geist text-sm font-medium text-[#003527] uppercase tracking-[0.2em]">Enterprise Climate OS</span>
+                <span className="font-geist text-sm font-medium text-[#003527] uppercase tracking-[0.2em]">Personal Climate Guide</span>
               </div>
 
               <h1
@@ -129,7 +128,7 @@ const LandingPage: React.FC = () => {
                 className="font-inter text-xl text-[#404944] max-w-xl pr-8 leading-8"
                 style={{ animation: 'fadeSlideUp 0.8s cubic-bezier(0.16,1,0.3,1) 0.35s both' }}
               >
-                Pragmatic solutions for a sustainable future. Empower your organization with institutional-grade environmental intelligence, delivered through a lens of absolute clarity.
+                Simple, powerful tools to understand your personal impact. Make changes that matter — for your wallet, your health, and the planet.
               </p>
 
               <div
@@ -219,23 +218,23 @@ const LandingPage: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
               <div className="lg:col-span-5 flex flex-col gap-8 order-2 lg:order-1">
                 <h2 className="font-geist text-3xl md:text-5xl font-semibold text-[#003527] leading-tight">
-                  Precision over panic.
+                  Clarity over complexity.
                 </h2>
                 <p className="font-inter text-lg text-[#404944] leading-8">
-                  We strip away the noise of carbon accounting, providing you with a clear, auditable trail of your environmental impact integrated directly into your natural workflow.
+                  We make sense of your daily choices, showing you exactly how your lifestyle shapes your carbon footprint — and what you can do about it today.
                 </p>
 
                 <div className="space-y-10 mt-4">
                   {[
                     {
                       icon: 'radar',
-                      title: 'High-Fidelity Tracking',
-                      desc: 'Automated ingestion of utility data, spend records, and operational metrics mapped instantly to global emission factors.',
+                      title: 'Easy Personal Tracking',
+                      desc: 'Log your travel, home energy use, and food habits in minutes. We map them against global emission factors so you always know where you stand.',
                     },
                     {
                       icon: 'eco',
-                      title: 'Science-Based Targets',
-                      desc: 'Align your reduction strategies with SBTi frameworks. Model scenarios and track progress against absolute commitments.',
+                      title: 'Goals That Fit Your Life',
+                      desc: 'Set realistic reduction targets and track progress week by week. Every small change you make adds up to meaningful impact.',
                     },
                   ].map((feature) => (
                     <div key={feature.title} className="flex gap-6">
@@ -261,9 +260,9 @@ const LandingPage: React.FC = () => {
                   <div className="absolute bottom-8 left-8 right-8 glass-panel rounded-2xl p-6 flex items-center justify-between">
                     <div>
                       <p className="font-geist text-xs font-semibold uppercase tracking-wider text-[#003527] mb-1">Recommended Action</p>
-                      <p className="font-inter text-base font-medium text-[#141b2b]">Transition facility alpha to 100% renewables</p>
+                      <p className="font-inter text-base font-medium text-[#141b2b]">Switch to a green energy tariff at home</p>
                     </div>
-                    <span className="bg-[#003527] text-white px-4 py-2 rounded-full font-geist text-sm whitespace-nowrap ml-4">-1,200 tCO2e</span>
+                    <span className="bg-[#003527] text-white px-4 py-2 rounded-full font-geist text-sm whitespace-nowrap ml-4">-0.4 tCO2e</span>
                   </div>
                 </div>
               </div>
@@ -299,7 +298,7 @@ const LandingPage: React.FC = () => {
                 The methodology behind the impact.
               </h2>
               <p className="font-inter text-xl text-[#404944] leading-8">
-                A streamlined ecosystem designed for enterprise complexity, mimicking the natural flow of data to insight.
+                A simple three-step flow that turns your everyday habits into a clear picture of your personal carbon footprint.
               </p>
             </div>
 
@@ -349,10 +348,10 @@ const LandingPage: React.FC = () => {
 
           <div className="max-w-4xl mx-auto px-4 md:px-10 text-center relative z-10 flex flex-col items-center gap-8">
             <h2 className="font-geist text-4xl md:text-6xl text-white font-semibold leading-tight">
-              Ready to institutionalize your climate strategy?
+              Your footprint. Your future.
             </h2>
             <p className="font-inter text-xl text-[#b0f0d6] max-w-2xl font-light">
-              Join forward-thinking enterprises that have moved beyond spreadsheets to secure, scalable environmental intelligence.
+              Join thousands of individuals who are taking practical steps toward a lower-carbon lifestyle — one habit at a time.
             </p>
             {/* item 6: only one CTA button now */}
             <Link
@@ -365,8 +364,6 @@ const LandingPage: React.FC = () => {
         </section>
 
       </main>
-
-      <Footer />
 
       {/* ─── Keyframe definitions ─── */}
       <style>{`

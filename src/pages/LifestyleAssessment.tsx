@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import Footer from '../components/layout/Footer';
+import { useProfile } from '../context/ProfileContext';
+import { OptionCard } from '../components/ui/OptionCard';
+import { validateAssessmentStep } from '../lib/validation';
 
 const steps = ['Transportation', 'Energy', 'Food', 'Household', 'Goal'];
 
@@ -41,39 +44,8 @@ const goalOptions = [
   { value: 'zero', icon: 'public', label: 'Net Zero', sub: 'Full commitment' },
 ];
 
-interface OptionCardProps {
-  value: string;
-  icon: string;
-  label: string;
-  sub: string;
-  selected: boolean;
-  onSelect: (val: string) => void;
-}
-
-const OptionCard: React.FC<OptionCardProps> = ({ value, icon, label, sub, selected, onSelect }) => (
-  <button
-    className={`option-card rounded-2xl p-4 flex flex-col items-center gap-3 text-center group transition-all duration-300 border-2 ${
-      selected ? 'option-card-selected' : 'option-card-unselected'
-    }`}
-    data-value={value}
-    onClick={() => onSelect(value)}
-    type="button"
-  >
-    <div className={`p-4 rounded-full transition-all duration-300 transform group-hover:scale-105 ${
-      selected
-        ? 'bg-[#064e3b] text-[#80bea6]'
-        : 'bg-[#e1e8fd] group-hover:bg-[#064e3b] group-hover:text-[#80bea6]'
-    }`}>
-      <span className="material-symbols-outlined text-4xl">{icon}</span>
-    </div>
-    <div className="mt-1">
-      <div className="font-geist text-base font-semibold text-[#141b2b]">{label}</div>
-      <div className="font-inter text-sm text-[#404944] mt-1">{sub}</div>
-    </div>
-  </button>
-);
-
 const LifestyleAssessment: React.FC = () => {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [transportMode, setTransportMode] = useState<string | null>(null);
   const [weeklyDistance, setWeeklyDistance] = useState('');
@@ -82,14 +54,70 @@ const LifestyleAssessment: React.FC = () => {
   const [dietType, setDietType] = useState<string | null>(null);
   const [householdSize, setHouseholdSize] = useState<string | null>(null);
   const [reductionGoal, setReductionGoal] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const stepContentRef = useRef<HTMLDivElement>(null);
+  const announcerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (announcerRef.current) {
+      announcerRef.current.textContent = `Step ${currentStep + 1} of ${steps.length}: ${steps[currentStep]}`;
+    }
+    if (stepContentRef.current) {
+      const heading = stepContentRef.current.querySelector('h1');
+      if (heading) {
+        heading.tabIndex = -1;
+        heading.focus();
+      }
+    }
+  }, [currentStep]);
+
+  const { updateProfile } = useProfile();
+
+  const getFormData = () => ({
+    transportMode,
+    weeklyDistance,
+    energySource,
+    monthlyKwh,
+    dietType,
+    householdSize,
+    reductionGoal,
+  });
+
+  const handleComplete = () => {
+    const data = getFormData();
+    const validation = validateAssessmentStep(4, data);
+    if (!validation.isValid) {
+      setError(validation.error);
+      return;
+    }
+    updateProfile({
+      transportMode: transportMode ?? 'car',
+      weeklyDistance: Number(weeklyDistance) || 80,
+      energySource: energySource ?? 'grid',
+      monthlyKwh: Number(monthlyKwh) || 400,
+      dietType: dietType ?? 'omnivore',
+      householdSize: householdSize ?? '2',
+      reductionGoal: reductionGoal ?? '25',
+    });
+    navigate('/overview');
+  };
 
   const progressPercent = ((currentStep + 1) / steps.length) * 100;
 
   const handleNext = () => {
+    setError(null);
+    const data = getFormData();
+    const validation = validateAssessmentStep(currentStep, data);
+    if (!validation.isValid) {
+      setError(validation.error);
+      return;
+    }
+    
     if (currentStep < steps.length - 1) setCurrentStep((s) => s + 1);
   };
 
   const handleBack = () => {
+    setError(null);
     if (currentStep > 0) setCurrentStep((s) => s - 1);
   };
 
@@ -116,8 +144,8 @@ const LifestyleAssessment: React.FC = () => {
                 Weekly Journey Distance (km)
               </label>
               <div className="relative mt-2">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-[#404944]">
-                  <span className="material-symbols-outlined text-xl">explore</span>
+                <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-[#404944]" aria-hidden="true">
+                  <span className="material-symbols-outlined text-xl" aria-hidden="true">explore</span>
                 </span>
                 <input
                   className="w-full bg-white/80 border border-[#bfc9c3] rounded-xl pl-12 pr-4 py-4 text-[#141b2b] focus:outline-none focus:ring-2 focus:ring-[#003527] focus:border-[#003527] transition-all font-inter text-base placeholder:text-[#bfc9c3] shadow-inner"
@@ -127,10 +155,10 @@ const LifestyleAssessment: React.FC = () => {
                   type="number"
                   value={weeklyDistance}
                   min="0"
-                  aria-label="Weekly journey distance in kilometers"
+                  aria-describedby="commute-distance-hint"
                 />
               </div>
-              <p className="font-inter text-xs text-[#404944] mt-1">Estimate the total distance you travel in a typical week.</p>
+              <p className="font-inter text-xs text-[#404944] mt-1" id="commute-distance-hint">Estimate the total distance you travel in a typical week.</p>
             </div>
           </>
         );
@@ -155,8 +183,8 @@ const LifestyleAssessment: React.FC = () => {
                 Monthly Energy Usage (kWh)
               </label>
               <div className="relative mt-2">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-[#404944]">
-                  <span className="material-symbols-outlined text-xl">bolt</span>
+                <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-[#404944]" aria-hidden="true">
+                  <span className="material-symbols-outlined text-xl" aria-hidden="true">bolt</span>
                 </span>
                 <input
                   className="w-full bg-white/80 border border-[#bfc9c3] rounded-xl pl-12 pr-4 py-4 text-[#141b2b] focus:outline-none focus:ring-2 focus:ring-[#003527] focus:border-[#003527] transition-all font-inter text-base placeholder:text-[#bfc9c3] shadow-inner"
@@ -166,10 +194,10 @@ const LifestyleAssessment: React.FC = () => {
                   type="number"
                   value={monthlyKwh}
                   min="0"
-                  aria-label="Monthly energy usage in kilowatt hours"
+                  aria-describedby="monthly-kwh-hint"
                 />
               </div>
-              <p className="font-inter text-xs text-[#404944] mt-1">Check your utility bill for your average monthly usage.</p>
+              <p className="font-inter text-xs text-[#404944] mt-1" id="monthly-kwh-hint">Check your utility bill for your average monthly usage.</p>
             </div>
           </>
         );
@@ -240,54 +268,75 @@ const LifestyleAssessment: React.FC = () => {
       {/* Assessment Header */}
       <header className="w-full bg-[#f9f9ff]/80 backdrop-blur-md border-b border-[#bfc9c3] sticky top-0 z-10 shadow-sm">
         <div className="px-4 md:px-10 max-w-[1440px] mx-auto py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-[#003527] font-geist text-2xl font-bold">
-            <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>forest</span>
-            CarbWiser
+          <div className="flex items-center gap-2 text-[#003527] font-geist text-2xl font-bold" aria-label="CarbWiser">
+            <span className="material-symbols-outlined text-3xl" aria-hidden="true" style={{ fontVariationSettings: "'FILL' 1" }}>forest</span>
+            <span>CarbWiser</span>
           </div>
           <Link
             to="/"
             className="text-[#404944] hover:text-[#141b2b] transition-colors font-geist text-sm font-medium flex items-center gap-1"
-            aria-label="Save and exit"
+            aria-label="Save progress and exit assessment"
           >
             <span>Save &amp; Exit</span>
-            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>close</span>
+            <span className="material-symbols-outlined" aria-hidden="true" style={{ fontSize: '18px' }}>close</span>
           </Link>
         </div>
 
         {/* Progress Bar */}
-        <div className="w-full bg-[#dce2f7] h-1.5">
+        <div className="w-full bg-[#dce2f7] h-1.5" aria-hidden="true">
           <div
             className="bg-[#003527] h-full transition-all duration-700 ease-out rounded-r-full"
             style={{ width: `${progressPercent}%` }}
-            role="progressbar"
-            aria-valuenow={currentStep + 1}
-            aria-valuemin={1}
-            aria-valuemax={steps.length}
           />
+        </div>
+        <div
+          role="progressbar"
+          aria-valuenow={currentStep + 1}
+          aria-valuemin={1}
+          aria-valuemax={steps.length}
+          aria-valuetext={`Step ${currentStep + 1} of ${steps.length}: ${steps[currentStep]}`}
+          aria-label="Assessment progress"
+          className="sr-only"
+        >
+          Step {currentStep + 1} of {steps.length}: {steps[currentStep]}
         </div>
 
         {/* Step Navigation */}
-        <div className="px-4 md:px-10 max-w-[1440px] mx-auto py-2 flex gap-4 overflow-x-auto hide-scrollbar font-geist text-xs">
+        <nav aria-label="Assessment steps" className="px-4 md:px-10 max-w-[1440px] mx-auto py-2 flex gap-4 overflow-x-auto hide-scrollbar font-geist text-xs">
+          <ol role="list" className="flex gap-4">
           {steps.map((step, index) => (
-            <div
+            <li
               key={step}
+              aria-current={index === currentStep ? 'step' : undefined}
               className={`whitespace-nowrap ${
                 index === currentStep
                   ? 'text-[#003527] font-bold border-b-2 border-[#003527] pb-1'
+                  : index < currentStep
+                  ? 'text-[#2b6954]'
                   : 'text-[#404944]'
               }`}
             >
-              {index + 1}. {step}
-            </div>
+              <span aria-hidden="true">{index + 1}. </span>{step}
+              {index < currentStep && <span className="sr-only"> (completed)</span>}
+            </li>
           ))}
-        </div>
+          </ol>
+        </nav>
       </header>
 
       {/* Main Content */}
-      <main className="flex-grow flex flex-col items-center py-8 px-4 md:px-10 w-full max-w-4xl mx-auto">
-        <div className="w-full">
+      <main id="main-content" className="flex-grow flex flex-col items-center py-8 px-4 md:px-10 w-full max-w-4xl mx-auto">
+        <div className="w-full" aria-live="polite" aria-atomic="true" ref={stepContentRef}>
+          <span role="status" aria-live="polite" aria-atomic="true" className="sr-only" ref={announcerRef} />
           {renderStep()}
         </div>
+        
+        {error && (
+          <div className="mt-6 w-full p-4 bg-[#ba1a1a]/10 border border-[#ba1a1a]/30 rounded-xl flex items-center gap-3 text-[#ba1a1a]" role="alert">
+            <span className="material-symbols-outlined" aria-hidden="true">error</span>
+            <span className="font-inter text-sm font-medium">{error}</span>
+          </div>
+        )}
 
         {/* Navigation Buttons */}
         <div className="w-full flex justify-between items-center mt-auto pt-8 border-t border-[#bfc9c3]/50 mt-8">
@@ -311,13 +360,14 @@ const LifestyleAssessment: React.FC = () => {
               <span className="material-symbols-outlined text-sm">arrow_forward</span>
             </button>
           ) : (
-            <Link
-              to="/overview"
+            <button
+              onClick={handleComplete}
+              type="button"
               className="bg-[#003527] text-white px-8 py-4 rounded-xl font-geist text-sm font-medium hover:bg-[#064e3b] transition-all shadow-md hover:shadow-lg flex items-center gap-2 transform hover:-translate-y-0.5"
             >
               View My Footprint
               <span className="material-symbols-outlined text-sm">arrow_forward</span>
-            </Link>
+            </button>
           )}
         </div>
       </main>

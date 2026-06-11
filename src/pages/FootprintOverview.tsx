@@ -1,48 +1,24 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import Navbar from '../components/layout/Navbar';
-import Footer from '../components/layout/Footer';
+import { calculateFootprint } from '../lib/carbonCalculation';
+import { useProfile } from '../context/ProfileContext';
+import { AnimatedNumber } from '../components/ui/AnimatedNumber';
 
-interface AnimatedNumberProps {
-  value: number;
-  duration?: number;
-  suffix?: string;
-}
-
-const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
-  value,
-  duration = 1500,
-  suffix = "",
-}) => {
-  const [displayValue, setDisplayValue] = React.useState(0);
-
-  React.useEffect(() => {
-    let startTime: number | null = null;
-    const step = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
-      setDisplayValue(Math.floor(eased * value));
-      if (progress < 1) {
-        requestAnimationFrame(step);
-      }
-    };
-    requestAnimationFrame(step);
-  }, [value, duration]);
-
-  return (
-    <span>
-      {displayValue}
-      {suffix}
-    </span>
-  );
+type PeriodData = {
+  id: string;
+  label: string;
+  footprint: number;
+  reduction: number;
+  reductionLabel: string;
+  ecoScore: number;
+  ecoScoreLabel: string;
+  percentages: { transportation: number; energy: number; food: number };
 };
 
-const emissionCategories = [
+const baseCategories = [
   {
     label: 'Transportation',
     icon: 'directions_car',
-    percentage: 45,
     color: 'bg-[#0060ac]',
     trackColor: 'bg-[#a4c9ff]/30',
     textColor: 'text-[#0060ac]',
@@ -52,7 +28,6 @@ const emissionCategories = [
   {
     label: 'Energy',
     icon: 'bolt',
-    percentage: 35,
     color: 'bg-[#2b6954]',
     trackColor: 'bg-[#bdcac1]/30',
     textColor: 'text-[#2b6954]',
@@ -62,7 +37,6 @@ const emissionCategories = [
   {
     label: 'Food',
     icon: 'restaurant',
-    percentage: 20,
     color: 'bg-[#3b4741]',
     trackColor: 'bg-[#dce2f7]',
     textColor: 'text-[#3b4741]',
@@ -72,6 +46,72 @@ const emissionCategories = [
 ];
 
 const FootprintOverview: React.FC = () => {
+  const [selectedPeriodId, setSelectedPeriodId] = React.useState('ytd');
+  const { profile } = useProfile();
+
+  const periods: PeriodData[] = useMemo(() => {
+    const metrics = calculateFootprint(profile);
+    const BASELINE_AVG = 7000;
+    const lastYearFootprint = Math.round(metrics.total * 1.15);
+    const monthFootprint = Math.round(metrics.total / 12);
+
+    const ytdReduction = Math.round(((BASELINE_AVG - metrics.total) / BASELINE_AVG) * 100);
+    const lastYearReduction = Math.round(((metrics.total - lastYearFootprint) / lastYearFootprint) * 100);
+    const prevMonthFootprint = Math.round(monthFootprint * 1.08);
+    const monthReduction = Math.round(((prevMonthFootprint - monthFootprint) / prevMonthFootprint) * 100);
+
+    return [
+      {
+        id: 'ytd',
+        label: 'Current Year Estimate',
+        footprint: metrics.total,
+        reduction: ytdReduction,
+        reductionLabel: 'vs. national average',
+        ecoScore: metrics.ecoScore,
+        ecoScoreLabel: metrics.ecoScoreLabel,
+        percentages: { 
+          transportation: metrics.categories.transportation.percentage, 
+          energy: metrics.categories.energy.percentage, 
+          food: metrics.categories.food.percentage 
+        },
+      },
+      {
+        id: 'last-year',
+        label: 'Last Year (Estimated)',
+        footprint: lastYearFootprint,
+        reduction: lastYearReduction,
+        reductionLabel: 'vs. previous year',
+        ecoScore: Math.max(0, Math.round(100 - (lastYearFootprint / BASELINE_AVG) * 50)),
+        ecoScoreLabel: Math.max(0, Math.round(100 - (lastYearFootprint / BASELINE_AVG) * 50)) >= 80 ? 'Excellent' : Math.max(0, Math.round(100 - (lastYearFootprint / BASELINE_AVG) * 50)) >= 60 ? 'Good' : 'Needs Work',
+        percentages: { 
+          transportation: Math.round((metrics.categories.transportation.kg * 1.15 / (lastYearFootprint)) * 100) || 0,
+          energy: Math.round((metrics.categories.energy.kg * 1.15 / (lastYearFootprint)) * 100) || 0,
+          food: Math.round((metrics.categories.food.kg * 1.15 / (lastYearFootprint)) * 100) || 0,
+        },
+      },
+      {
+        id: 'last-month',
+        label: 'Last Month',
+        footprint: monthFootprint,
+        reduction: monthReduction,
+        reductionLabel: 'vs. prev month',
+        ecoScore: metrics.ecoScore,
+        ecoScoreLabel: metrics.ecoScoreLabel,
+        percentages: { 
+          transportation: metrics.categories.transportation.percentage, 
+          energy: metrics.categories.energy.percentage, 
+          food: metrics.categories.food.percentage 
+        },
+      }
+    ];
+  }, [profile]);
+
+  const currentData = periods.find(p => p.id === selectedPeriodId) || periods[0];
+  
+  const currentCategories = baseCategories.map(cat => ({
+    ...cat,
+    percentage: currentData.percentages[cat.label.toLowerCase() as keyof typeof currentData.percentages]
+  }));
   return (
     <div className="bg-[#f9f9ff] text-[#141b2b] min-h-screen flex flex-col font-inter overflow-x-hidden">
       {/* Ambient Background Effects */}
@@ -80,20 +120,29 @@ const FootprintOverview: React.FC = () => {
         <div className="absolute bottom-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-[#2b6954]/10 blur-[120px] rounded-full blob-shape opacity-60" style={{ animationDelay: '-4s' }} />
       </div>
 
-      <Navbar />
 
-      <main className="flex-grow w-full px-4 md:px-10 max-w-[1440px] mx-auto py-8 flex flex-col gap-8 relative z-10">
+      <main id="main-content" className="flex-grow w-full px-4 md:px-10 max-w-[1440px] mx-auto py-8 flex flex-col gap-8 relative z-10">
         {/* Header */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 animate-fade-in mb-2">
           <div>
-            <h1 className="font-geist text-3xl md:text-5xl font-semibold text-[#003527] tracking-tight">Overview</h1>
+            <h1 className="font-geist text-3xl md:text-5xl font-semibold text-[#003527] tracking-tight">My Footprint</h1>
             <p className="font-inter text-lg text-[#404944] mt-2 max-w-2xl leading-7">
-              Your personal climate impact terrain. Track, understand, and reduce your carbon footprint.
+              A clear picture of your personal climate impact. See where your emissions come from and what you can do to reduce them.
             </p>
           </div>
-          <div className="flex items-center gap-2 bg-white/80 px-5 py-2.5 rounded-full border border-[#bfc9c3] shadow-sm">
-            <span className="material-symbols-outlined text-[#003527]">calendar_month</span>
-            <span className="font-geist text-sm font-semibold text-[#141b2b]">2024 Year to Date</span>
+          <div className="flex items-center gap-2 bg-white/80 px-4 py-2 rounded-full border border-[#bfc9c3] shadow-sm hover:border-[#003527] transition-colors focus-within:ring-2 focus-within:ring-[#003527]/50">
+            <span className="material-symbols-outlined text-[#003527]" aria-hidden="true">calendar_month</span>
+            <select 
+              value={selectedPeriodId}
+              onChange={(e) => setSelectedPeriodId(e.target.value)}
+              className="bg-transparent border-none outline-none font-geist text-sm font-semibold text-[#141b2b] cursor-pointer appearance-none pr-6 relative z-10"
+              style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23141b2b%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right center', backgroundSize: '16px' }}
+              aria-label="Select reporting period"
+            >
+              {periods.map(p => (
+                <option key={p.id} value={p.id}>{p.label}</option>
+              ))}
+            </select>
           </div>
         </header>
 
@@ -120,30 +169,40 @@ const FootprintOverview: React.FC = () => {
               {/* Total Footprint */}
               <div className="flex flex-col gap-6 w-full md:w-auto">
                 <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-[#95d3ba]" style={{ fontSize: '28px' }}>public</span>
+                  <span className="material-symbols-outlined text-[#95d3ba]" aria-hidden="true" style={{ fontSize: '28px' }}>public</span>
                   <span className="font-geist text-sm font-bold text-[#95d3ba] uppercase tracking-[0.15em]">Annual Carbon Footprint</span>
                 </div>
 
                 <div className="flex flex-col gap-1">
                   <div className="flex items-baseline gap-3">
-                    <span className="text-[72px] md:text-[96px] font-geist font-bold leading-none tracking-tighter text-white drop-shadow-md">4,250</span>
+                    <span className="text-[72px] md:text-[96px] font-geist font-bold leading-none tracking-tighter text-white drop-shadow-md">
+                      <AnimatedNumber value={currentData.footprint} />
+                    </span>
                   </div>
                   <span className="font-geist text-2xl text-[#b0f0d6] font-medium mt-2">kg CO₂e</span>
                 </div>
 
-                <div className="flex items-center gap-3 mt-2 bg-[#064e3b]/40 px-4 py-3 rounded-2xl w-fit border border-[#b0f0d6]/10">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#b0f0d6] text-[#002117] shadow-inner">
-                    <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>arrow_downward</span>
+                <div className="flex items-center gap-3 mt-2 bg-[#064e3b]/40 px-4 py-3 rounded-2xl w-fit border border-[#b0f0d6]/10" aria-label={`${Math.abs(currentData.reduction)}% reduction ${currentData.reductionLabel}`}>
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#b0f0d6] text-[#002117] shadow-inner" aria-hidden="true">
+                    <span className="material-symbols-outlined" aria-hidden="true" style={{ fontSize: '20px' }}>
+                      {currentData.reduction > 0 ? 'arrow_downward' : 'arrow_upward'}
+                    </span>
                   </div>
                   <div className="flex flex-col">
-                    <span className="font-geist text-2xl text-white leading-none font-bold">12%</span>
-                    <span className="font-geist text-xs text-[#95d3ba] uppercase tracking-wider mt-1">vs. previous year</span>
+                    <span className="font-geist text-2xl text-white leading-none font-bold" aria-hidden="true">
+                      <AnimatedNumber value={Math.abs(currentData.reduction)} suffix="%" />
+                    </span>
+                    <span className="font-geist text-xs text-[#95d3ba] uppercase tracking-wider mt-1">{currentData.reductionLabel}</span>
                   </div>
                 </div>
               </div>
 
               {/* Eco Score Orb */}
-              <div className="flex flex-col items-center justify-center self-center p-8 bg-[#2b6954]/20 rounded-full border border-[#b0f0d6]/20 shadow-2xl relative min-w-[240px] min-h-[240px]">
+              <div
+                className="flex flex-col items-center justify-center self-center p-8 bg-[#2b6954]/20 rounded-full border border-[#b0f0d6]/20 shadow-2xl relative min-w-[240px] min-h-[240px]"
+                role="img"
+                aria-label={`Eco Score: ${currentData.ecoScore} out of 100 – ${currentData.ecoScoreLabel}`}
+              >
                 <motion.div
                   className="absolute inset-0 rounded-full bg-[#b0f0d6]/10 blur-xl blob-shape pointer-events-none"
                   animate={{
@@ -156,9 +215,9 @@ const FootprintOverview: React.FC = () => {
                     ease: "easeInOut",
                   }}
                 />
-                <span className="font-geist text-sm font-bold text-[#95d3ba] uppercase tracking-widest mb-4 z-10">Eco Score</span>
+                <span className="font-geist text-sm font-bold text-[#95d3ba] uppercase tracking-widest mb-4 z-10" aria-hidden="true">Eco Score</span>
 
-                <div className="relative flex items-center justify-center w-32 h-32 z-10">
+                <div className="relative flex items-center justify-center w-32 h-32 z-10" aria-hidden="true">
                   <svg className="w-full h-full transform -rotate-90 drop-shadow-lg" viewBox="0 0 36 36">
                     <path
                       className="text-[#064e3b]/50"
@@ -176,53 +235,60 @@ const FootprintOverview: React.FC = () => {
                       strokeWidth="3"
                       style={{ filter: 'drop-shadow(0 0 8px rgba(176, 240, 214, 0.6))' }}
                       initial={{ pathLength: 0 }}
-                      animate={{ pathLength: 0.85 }}
+                      animate={{ pathLength: currentData.ecoScore / 100 }}
                       transition={{ duration: 1.5, ease: "easeOut" }}
                     />
                   </svg>
                   <div className="absolute inset-0 flex items-center justify-center flex-col">
                     <span className="text-[56px] font-geist font-bold text-white leading-none tracking-tight">
-                      <AnimatedNumber value={85} />
+                      <AnimatedNumber value={currentData.ecoScore} />
                     </span>
                   </div>
                 </div>
 
                 <div className="mt-6 px-4 py-1.5 rounded-full bg-[#b0f0d6] text-[#002117] font-geist text-sm font-bold z-10 uppercase tracking-widest shadow-sm">
-                  Excellent
+                  {currentData.ecoScoreLabel}
                 </div>
               </div>
             </div>
           </div>
 
           {/* Emission Breakdown */}
-          <div className="flex-grow lg:w-1/3 bg-white/90 border border-[#bfc9c3]/60 rounded-[40px] p-8 md:p-10 flex flex-col gap-8 animate-fade-in-delay-2 shadow-lg relative overflow-hidden">
-            <div className="absolute inset-0 opacity-5 pointer-events-none">
-              <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
-                <path d="M0,100 C20,90 40,80 100,95 L100,100 Z" fill="#2b6954" />
-                <path d="M0,100 C30,85 60,75 100,90 L100,100 Z" fill="#003527" opacity="0.5" />
-              </svg>
-            </div>
+            <div className="flex-grow lg:w-1/3 bg-white/90 border border-[#bfc9c3]/60 rounded-[40px] p-8 md:p-10 flex flex-col gap-8 animate-fade-in-delay-2 shadow-lg relative overflow-hidden">
+              <div className="absolute inset-0 opacity-5 pointer-events-none">
+                <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+                  <path d="M0,100 C20,90 40,80 100,95 L100,100 Z" fill="#2b6954" />
+                  <path d="M0,100 C30,85 60,75 100,90 L100,100 Z" fill="#003527" opacity="0.5" />
+                </svg>
+              </div>
 
-            <div className="flex items-center gap-3 relative z-10">
-              <span className="material-symbols-outlined text-[#2b6954]" style={{ fontSize: '24px' }}>layers</span>
-              <h2 className="font-geist text-2xl font-medium text-[#141b2b]">Emission Breakdown</h2>
-            </div>
+              <div className="flex items-center gap-3 relative z-10">
+                <span className="material-symbols-outlined text-[#2b6954]" style={{ fontSize: '24px' }}>layers</span>
+                <h2 className="font-geist text-2xl font-medium text-[#141b2b]">Your Emissions by Category</h2>
+              </div>
 
             <div className="flex flex-col gap-8 relative z-10">
-              {emissionCategories.map((cat) => (
+              {currentCategories.map((cat) => (
                 <div key={cat.label} className="flex flex-col gap-3 group">
                   <div className="flex justify-between items-end">
                     <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-2xl ${cat.bgColor} flex items-center justify-center ${cat.iconColor} transition-transform group-hover:scale-110 duration-300`}>
-                        <span className="material-symbols-outlined" style={{ fontSize: '24px', fontVariationSettings: "'FILL' 1" }}>{cat.icon}</span>
+                      <div className={`w-12 h-12 rounded-2xl ${cat.bgColor} flex items-center justify-center ${cat.iconColor} transition-transform group-hover:scale-110 duration-300`} aria-hidden="true">
+                        <span className="material-symbols-outlined" aria-hidden="true" style={{ fontSize: '24px', fontVariationSettings: "'FILL' 1" }}>{cat.icon}</span>
                       </div>
                       <span className="font-inter text-lg text-[#141b2b] font-medium">{cat.label}</span>
                     </div>
-                    <span className={`font-geist text-2xl font-bold ${cat.textColor}`}>
+                    <span className={`font-geist text-2xl font-bold ${cat.textColor}`} aria-hidden="true">
                       <AnimatedNumber value={cat.percentage} suffix="%" />
                     </span>
                   </div>
-                  <div className={`w-full h-4 ${cat.trackColor} rounded-full overflow-hidden shadow-inner relative`}>
+                  <div
+                    className={`w-full h-4 ${cat.trackColor} rounded-full overflow-hidden shadow-inner relative`}
+                    role="meter"
+                    aria-valuenow={cat.percentage}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-label={`${cat.label}: ${cat.percentage}% of your emissions`}
+                  >
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${cat.percentage}%` }}
@@ -247,8 +313,6 @@ const FootprintOverview: React.FC = () => {
           </div>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 };
