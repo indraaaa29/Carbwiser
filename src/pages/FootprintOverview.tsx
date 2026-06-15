@@ -1,8 +1,10 @@
 import React, { useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { calculateFootprint } from '../lib/carbonCalculation';
 import { useProfile } from '../context/ProfileContext';
 import { AnimatedNumber } from '../components/ui/AnimatedNumber';
+import { generateRecommendations } from '../lib/recommendationEngine';
 
 type PeriodData = {
   id: string;
@@ -112,6 +114,12 @@ const FootprintOverview: React.FC = () => {
     ...cat,
     percentage: currentData.percentages[cat.label.toLowerCase() as keyof typeof currentData.percentages]
   }));
+
+  const biggestHotspot = currentCategories.reduce((prev, current) => (prev.percentage > current.percentage) ? prev : current);
+  const recommendations = useMemo(() => generateRecommendations(profile), [profile]);
+  const catMap: Record<string, string> = { 'Transportation': 'mobility', 'Energy': 'energy', 'Food': 'food' };
+  const hotspotRec = recommendations.find(r => r.category === catMap[biggestHotspot.label]) || recommendations[0];
+
   return (
     <div className="bg-[#f9f9ff] text-[#141b2b] min-h-screen flex flex-col font-inter overflow-x-hidden">
       {/* Ambient Background Effects */}
@@ -312,6 +320,72 @@ const FootprintOverview: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Biggest Hotspot Insight Card */}
+        <div className="mt-8 bg-[#fff5f5] border border-[#ffcfcf] rounded-[32px] p-8 md:p-10 shadow-sm relative overflow-hidden flex flex-col md:flex-row items-center gap-8 animate-fade-in-delay-3">
+          <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-[#ba1a1a]/10 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="w-20 h-20 rounded-full bg-[#ba1a1a]/10 text-[#ba1a1a] flex items-center justify-center shrink-0 shadow-inner relative z-10">
+            <span className="material-symbols-outlined text-[40px]" aria-hidden="true">local_fire_department</span>
+          </div>
+
+          <div className="relative z-10 flex-grow text-center md:text-left">
+            <h3 className="font-geist text-sm font-bold text-[#ba1a1a] uppercase tracking-wider mb-2">Your Biggest Hotspot</h3>
+            <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-4 mb-2 justify-center md:justify-start">
+              <span className="font-geist text-3xl font-semibold text-[#141b2b]">{biggestHotspot.label} Emissions</span>
+              <span className="font-inter text-lg text-[#ba1a1a] font-medium bg-[#ba1a1a]/10 px-3 py-1 rounded-full w-fit mx-auto md:mx-0">
+                {biggestHotspot.percentage}% of your total footprint
+              </span>
+            </div>
+            <p className="font-inter text-[#404944] max-w-2xl mb-4 mx-auto md:mx-0">
+              This category contributes the largest share of your annual emissions and offers the greatest reduction opportunity.
+            </p>
+            {hotspotRec && (
+              <div className="flex items-center justify-center md:justify-start gap-2 text-sm font-medium text-[#2b6954] bg-[#b0f0d6]/30 px-4 py-2 rounded-lg w-fit mx-auto md:mx-0">
+                <span className="material-symbols-outlined text-[18px]">trending_down</span>
+                Potential Reduction: {hotspotRec.estReduction} with top recommended action
+              </div>
+            )}
+          </div>
+
+          <div className="relative z-10 shrink-0 mt-4 md:mt-0 w-full md:w-auto">
+            <Link 
+              to="/actions" 
+              className="w-full md:w-auto bg-[#ba1a1a] text-white px-6 py-4 md:py-3 rounded-xl font-geist text-sm font-semibold hover:bg-[#93000a] transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+            >
+              View Recommendations
+              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">arrow_forward</span>
+            </Link>
+          </div>
+        </div>
+
+        {/* Next Steps CTA */}
+        <section className="mt-8 bg-white border border-[#bfc9c3]/60 rounded-[32px] p-8 md:p-12 shadow-sm relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8 animate-fade-in-delay-3">
+          {/* Background element */}
+          <div className="absolute -right-20 -top-20 w-64 h-64 bg-[#b0f0d6]/20 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="relative z-10 max-w-xl text-center md:text-left">
+            <h2 className="font-geist text-3xl font-semibold text-[#003527] mb-3">Ready to reduce your footprint?</h2>
+            <p className="font-inter text-lg text-[#404944]">Get personalized actions based on your carbon hotspots and lifestyle choices.</p>
+          </div>
+          
+          <div className="relative z-10 flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+            <Link 
+              to="/actions" 
+              className="bg-[#003527] text-white px-8 py-4 rounded-xl font-geist text-base font-semibold hover:bg-[#064e3b] transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+            >
+              <span className="material-symbols-outlined text-[20px]" aria-hidden="true">psychology</span>
+              View Smart Actions
+            </Link>
+            <Link 
+              to="/roadmap" 
+              className="bg-[#f9f9ff] text-[#003527] border-2 border-[#003527] px-8 py-4 rounded-xl font-geist text-base font-semibold hover:bg-[#e1e8fd] transition-all duration-300 flex items-center justify-center gap-2"
+            >
+              <span className="material-symbols-outlined text-[20px]" aria-hidden="true">map</span>
+              Explore Roadmap
+            </Link>
+          </div>
+        </section>
       </main>
     </div>
   );

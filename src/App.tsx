@@ -15,10 +15,6 @@ const LazySimulator = lazy(() => import('./pages/WhatIfSimulator'));
 const LazyTracking = lazy(() => import('./pages/ProgressTracking'));
 const LazyMethodology = lazy(() => import('./pages/Methodology'));
 
-const LazyAgentation = lazy(() =>
-  import('agentation').then((mod) => ({ default: mod.Agentation }))
-);
-
 function App() {
   return (
     <>
@@ -46,11 +42,6 @@ function App() {
           </ProfileProvider>
         </MotionConfig>
       </BrowserRouter>
-      {import.meta.env.DEV && (
-        <Suspense fallback={null}>
-          <LazyAgentation />
-        </Suspense>
-      )}
     </>
   );
 }

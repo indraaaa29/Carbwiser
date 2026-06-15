@@ -24,11 +24,10 @@ const ProgressTracking: React.FC = () => {
   const { potentialReduction, completedReduction, progressPercentage, goalsCompleted, activeHabits, journeyData } = progress;
 
   const activeInitiatives = useMemo(() => actions.filter(a => a.status === 'committed'), [actions]);
-  const completedInitiatives = useMemo(() => actions.filter(a => a.status === 'completed'), [actions]);
 
   // Use top 4 committed actions for the roadmap preview
   const roadmapItems = useMemo(() => {
-    return activeInitiatives.slice(0, 4).map((a, i) => ({
+    return activeInitiatives.slice(0, 4).map((a) => ({
       label: a.title,
       date: new Date(a.committedAt).toLocaleDateString(),
       status: 'active' as const,

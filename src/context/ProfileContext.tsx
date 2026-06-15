@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
 import { DEFAULT_PROFILE, type UserProfile } from '../lib/recommendationEngine';
 
 const STORAGE_KEY = 'carbwiser_profile';
@@ -54,6 +54,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useProfile(): ProfileContextValue {
   const ctx = useContext(ProfileContext);
   if (!ctx) throw new Error('useProfile must be used within a ProfileProvider');

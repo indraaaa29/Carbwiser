@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import type { CommittedAction } from '../types';
 
 const STORAGE_KEY = 'carbwiser_actions';
@@ -65,6 +65,7 @@ export function ActionProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useActions(): ActionContextValue {
   const ctx = useContext(ActionContext);
   if (!ctx) throw new Error('useActions must be used within an ActionProvider');
