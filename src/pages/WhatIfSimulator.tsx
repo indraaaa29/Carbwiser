@@ -198,7 +198,7 @@ const WhatIfSimulator: React.FC = () => {
             <div
               className="sticky top-28 text-white rounded-2xl shadow-xl flex flex-col overflow-hidden"
               style={{
-                backgroundImage: 'url(https://lh3.googleusercontent.com/aida/AP1WRLvEPPKJcFiRipsQwfK5nd9B7FVcwgtlXoI_i7xJ7MyU2408dWYpnlTMCXEvVDENPUAQroJt_NAannTP_LlU9TOpigakCU07ruWIF1LlhP1FWbRg4rPHqn1n-AcrzgN4LxPNKWT334QPUhhJvJDMBelTJwtY4sZqphbUJs8xN8ObzwcKlCL-hdgsDLDYKgqZg2268KTVdVjB5cpHETOBQKtiLP0qi47EilsK0aHrM9EbQrMY614CVbDwEw)',
+                backgroundImage: 'url(https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=1440&auto=format&fit=crop)',
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
               }}

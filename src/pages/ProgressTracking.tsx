@@ -45,7 +45,7 @@ const ProgressTracking: React.FC = () => {
           <img
             alt="Flourishing forest representing ecological restoration"
             className="absolute inset-0 w-full h-full object-cover z-0"
-            src="https://lh3.googleusercontent.com/aida/AP1WRLtwaLymwW8MPX4IAsd63y8Y2cvqpq_XvjtuVSkmQcGrDkPG346NMQhKZJZvyvGFWo5twN4D2UMh5cPbU3f9k90UaYeEGjQ4hKRbSQnSa7oDX5t4nkdTVZckxOuhDD-mShTMp7sulFTYR9gxAEE_QZgLhwIxsz8IgOV4KJ1Bp3xKU7ld7b6R91LFLkpDgMGjQ8jJnfHWLCZTfr6G2oGR6N9jhmPfJETv0Mmnot6mUM0pD06fKvwLsiCZUA"
+            src="https://images.unsplash.com/photo-1511497584788-876760111969?q=80&w=1440&auto=format&fit=crop"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-[#003527]/90 via-[#003527]/70 to-transparent z-10" />
 
@@ -123,9 +123,13 @@ const ProgressTracking: React.FC = () => {
               </div>
               
               {activeInitiatives.length === 0 ? (
-                <div className="bg-[#f9f9ff] border border-[#bfc9c3] rounded-lg p-4 mt-4 text-center">
-                  <p className="font-geist text-sm text-[#404944] mb-3">No actions committed yet.</p>
-                  <Link to="/actions" className="inline-block bg-[#003527] text-white px-4 py-2 rounded-lg font-geist text-xs font-medium hover:bg-[#064e3b] transition-colors">
+                <div className="bg-[#f1f3ff] border border-[#bfc9c3]/50 rounded-xl p-8 mt-4 text-center flex flex-col items-center justify-center">
+                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mb-3 shadow-sm border border-[#bfc9c3]/30">
+                    <span className="material-symbols-outlined text-[#80bea6]" style={{ fontVariationSettings: "'FILL' 1" }}>eco</span>
+                  </div>
+                  <h3 className="font-geist text-base font-medium text-[#141b2b] mb-1">No Active Habits</h3>
+                  <p className="font-inter text-sm text-[#404944] mb-5 max-w-[250px] mx-auto">Start building your action plan to see your impact journey grow.</p>
+                  <Link to="/actions" className="inline-block bg-[#003527] text-white px-5 py-2.5 rounded-lg font-geist text-sm font-medium hover:bg-[#064e3b] transition-colors focus:outline-none focus:ring-2 focus:ring-[#003527] focus:ring-offset-2">
                     Explore Recommendations
                   </Link>
                 </div>
@@ -236,8 +240,10 @@ const ProgressTracking: React.FC = () => {
               </div>
 
               {roadmapItems.length === 0 ? (
-                <div className="text-center py-6 text-[#404944]">
-                  <p className="font-inter text-sm">No actions in progress.</p>
+                <div className="flex flex-col items-center justify-center py-10 px-4 text-center bg-[#f9f9ff] rounded-xl border border-[#bfc9c3]/30 mt-4 border-dashed">
+                  <span className="material-symbols-outlined text-[#bfc9c3] text-4xl mb-2" style={{ fontVariationSettings: "'FILL' 0" }}>route</span>
+                  <p className="font-geist text-sm font-medium text-[#404944]">Your roadmap is empty.</p>
+                  <p className="font-inter text-xs text-[#404944]/80 mt-1 max-w-[300px]">Commit to actions to visualize your upcoming milestones and reduction path.</p>
                 </div>
               ) : (
                 <div className="flex-grow flex flex-col sm:flex-row relative pt-2 gap-4 overflow-x-auto pb-4 hide-scrollbar mt-4">

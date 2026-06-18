@@ -11,7 +11,7 @@ export interface OptionCardProps {
 
 export const OptionCard: React.FC<OptionCardProps> = ({ value, icon, label, sub, selected, onSelect }) => (
   <button
-    className={`option-card rounded-2xl p-4 flex flex-col items-center gap-3 text-center group transition-all duration-300 border-2 ${
+    className={`option-card rounded-2xl p-4 flex flex-col items-center gap-3 text-center group transition-all duration-300 border-2 focus:outline-none focus:ring-2 focus:ring-[#003527] focus:ring-offset-2 ${
       selected ? 'option-card-selected border-[#064e3b]' : 'option-card-unselected border-transparent'
     }`}
     data-value={value}

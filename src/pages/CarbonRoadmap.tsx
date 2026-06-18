@@ -74,7 +74,7 @@ const CarbonRoadmap: React.FC = () => {
           <img
             alt="Lush green forest canopy viewed from above"
             className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-50"
-            src="https://lh3.googleusercontent.com/aida/AP1WRLvGpY0KKcqdIKtFLkWrN60va00xsm_jkZJ8P2sgnuP4EKt_ZxoBSBLFcBR3q-qcp-5tstHh_DmxbTe-AJQIMni26yyh9TZAYw-_gLqFe-_ECYcUsjsfl1p5ZaLrh0cEMTRzRuiOaSMDsRvZqicgO4e3Kl_8neVnB6WdB2w-P8SUiSy7L2isYj4RUchCEMsUw_lQjgvlUG_orbyXARN-4Ak7J6DFbPEcKn_cta0e8xTDsMAxnZJpII1XBQA"
+            src="https://images.unsplash.com/photo-1473448912268-2022ce9509d8?q=80&w=1440&auto=format&fit=crop"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#003527]/90 via-[#003527]/40 to-transparent" />
 
@@ -168,7 +168,14 @@ const CarbonRoadmap: React.FC = () => {
           <div className="bg-gradient-to-br from-[#064e3b] to-[#003527] rounded-2xl p-8 md:col-span-4 shadow-md text-white relative overflow-hidden">
             <span className="material-symbols-outlined absolute -right-6 -bottom-6 text-white opacity-10 transform -rotate-12" style={{ fontSize: '120px' }} aria-hidden="true">park</span>
             <h2 className="font-geist text-xs font-semibold uppercase text-[#b0f0d6] mb-6 tracking-wider relative z-10">Your Next Milestone</h2>
-            {nextMilestone ? (
+            {actions.length === 0 ? (
+              <div className="relative z-10">
+                <p className="font-inter text-sm text-[#b0f0d6] mb-4">Start committing to actions to see your roadmap.</p>
+                <Link to="/actions" className="inline-block bg-[#b0f0d6] text-[#003527] px-5 py-2.5 rounded-lg font-geist text-sm font-medium hover:bg-[#95d3ba] transition-colors focus:outline-none focus:ring-2 focus:ring-[#b0f0d6] focus:ring-offset-2">
+                  Explore Actions
+                </Link>
+              </div>
+            ) : nextMilestone ? (
               <>
                 <div className="flex items-center gap-4 mb-6 relative z-10">
                   <div className="w-14 h-14 rounded-full bg-[#b0f0d6] flex items-center justify-center text-[#064e3b] shadow-inner" aria-hidden="true">
@@ -191,7 +198,7 @@ const CarbonRoadmap: React.FC = () => {
             ) : (
               <div className="relative z-10">
                 <p className="font-inter text-sm text-[#b0f0d6] mb-4">You have completed all committed actions!</p>
-                <Link to="/actions" className="inline-block bg-[#b0f0d6] text-[#003527] px-4 py-2 rounded-lg font-geist text-sm font-medium hover:bg-white transition-colors">
+                <Link to="/actions" className="inline-block bg-[#b0f0d6] text-[#003527] px-4 py-2 rounded-lg font-geist text-sm font-medium hover:bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-[#b0f0d6] focus:ring-offset-2 focus:ring-offset-[#064e3b]">
                   Find more actions
                 </Link>
               </div>
@@ -213,7 +220,7 @@ const CarbonRoadmap: React.FC = () => {
               </div>
               <h3 className="font-geist text-2xl font-medium text-[#141b2b] mb-2">No actions committed yet</h3>
               <p className="font-inter text-[#404944] mb-6 max-w-md mx-auto">Visit Smart Actions to commit to lifestyle changes and build your personalized roadmap.</p>
-              <Link to="/actions" className="inline-block bg-[#003527] text-white px-6 py-3 rounded-lg font-geist text-sm font-medium hover:bg-[#064e3b] transition-colors">
+              <Link to="/actions" className="inline-block bg-[#003527] text-white px-6 py-3 rounded-lg font-geist text-sm font-medium hover:bg-[#064e3b] transition-colors focus:outline-none focus:ring-2 focus:ring-[#003527] focus:ring-offset-2">
                 Explore Recommendations
               </Link>
             </div>

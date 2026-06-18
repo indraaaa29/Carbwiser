@@ -96,7 +96,7 @@ const Navbar: React.FC = () => {
         {/* Brand */}
         <Link
           to="/"
-          className="font-geist text-xl font-semibold text-[#003527] tracking-tight hover:opacity-90 transition-opacity"
+          className="font-geist text-xl font-semibold text-[#003527] tracking-tight hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#003527] focus:ring-offset-2 rounded"
           aria-label="CarbWiser – go to home page"
         >
           CarbWiser
@@ -111,7 +111,7 @@ const Navbar: React.FC = () => {
                 key={link.href}
                 to={link.href}
                 aria-current={isActive ? 'page' : undefined}
-                className={`font-geist text-sm font-medium transition-colors duration-200 ${
+                className={`font-geist text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#003527] focus:ring-offset-2 rounded px-1 ${
                   isActive
                     ? 'text-[#003527] border-b-2 border-[#003527] pb-1 font-bold'
                     : 'text-[#404944] hover:text-[#003527]'
@@ -129,14 +129,14 @@ const Navbar: React.FC = () => {
             <button
               aria-label="Notifications"
               type="button"
-              className="p-2 text-[#404944] hover:text-[#003527] transition-colors rounded-full hover:bg-[#dce2f7]"
+              className="p-2 text-[#404944] hover:text-[#003527] transition-colors rounded-full hover:bg-[#dce2f7] focus:outline-none focus:ring-2 focus:ring-[#003527] focus:ring-offset-2"
             >
               <span className="material-symbols-outlined" aria-hidden="true" style={{ fontVariationSettings: "'FILL' 0" }}>notifications</span>
             </button>
             <button
               aria-label="Account settings"
               type="button"
-              className="p-2 text-[#404944] hover:text-[#003527] transition-colors rounded-full hover:bg-[#dce2f7]"
+              className="p-2 text-[#404944] hover:text-[#003527] transition-colors rounded-full hover:bg-[#dce2f7] focus:outline-none focus:ring-2 focus:ring-[#003527] focus:ring-offset-2"
             >
               <span className="material-symbols-outlined" aria-hidden="true" style={{ fontVariationSettings: "'FILL' 0" }}>account_circle</span>
             </button>
@@ -144,7 +144,7 @@ const Navbar: React.FC = () => {
 
           <Link
             to="/assessment"
-            className="hidden md:block bg-[#003527] text-white hover:bg-[#2b6954] transition-colors px-6 py-2.5 rounded-full font-geist text-sm font-medium"
+            className="hidden md:block bg-[#003527] text-white hover:bg-[#2b6954] transition-colors px-6 py-2.5 rounded-full font-geist text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#003527] focus:ring-offset-2"
           >
             Sign In
           </Link>
@@ -156,7 +156,7 @@ const Navbar: React.FC = () => {
             aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
             aria-expanded={menuOpen}
             aria-controls={menuId}
-            className="md:hidden p-2 text-[#141b2b]"
+            className="md:hidden p-2 text-[#141b2b] focus:outline-none focus:ring-2 focus:ring-[#003527] focus:ring-offset-2 rounded"
             onClick={() => setMenuOpen(!menuOpen)}
           >
             <span className="material-symbols-outlined" aria-hidden="true">
@@ -181,7 +181,7 @@ const Navbar: React.FC = () => {
               key={link.href}
               to={link.href}
               aria-current={isActive ? 'page' : undefined}
-              className={`font-geist text-sm font-medium py-2 ${
+              className={`font-geist text-sm font-medium py-2 focus:outline-none focus:ring-2 focus:ring-[#003527] rounded px-2 ${
                 isActive ? 'text-[#003527] font-bold' : 'text-[#404944]'
               }`}
             >
@@ -191,7 +191,7 @@ const Navbar: React.FC = () => {
         })}
         <Link
           to="/assessment"
-          className="bg-[#003527] text-white px-6 py-3 rounded-full text-center font-geist text-sm font-medium mt-2"
+          className="bg-[#003527] text-white px-6 py-3 rounded-full text-center font-geist text-sm font-medium mt-2 focus:outline-none focus:ring-2 focus:ring-[#003527] focus:ring-offset-2"
         >
           Start Assessment
         </Link>

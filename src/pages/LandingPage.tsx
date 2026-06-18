@@ -8,15 +8,20 @@ function useCountUp(target: number, duration = 1800, start = false) {
   useEffect(() => {
     if (!start) return;
     let startTime: number | null = null;
+    let animationFrameId: number;
     const step = (timestamp: number) => {
       if (!startTime) startTime = timestamp;
       const progress = Math.min((timestamp - startTime) / duration, 1);
       // Ease-out cubic
       const eased = 1 - Math.pow(1 - progress, 3);
       setValue(Math.floor(eased * target));
-      if (progress < 1) requestAnimationFrame(step);
+      if (progress < 1) {
+        animationFrameId = requestAnimationFrame(step);
+      }
     };
-    requestAnimationFrame(step);
+    animationFrameId = requestAnimationFrame(step);
+    
+    return () => cancelAnimationFrame(animationFrameId);
   }, [start, target, duration]);
   return value;
 }
@@ -29,7 +34,12 @@ function useInView(threshold = 0.2) {
     const el = ref.current;
     if (!el) return;
     const obs = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setInView(true); obs.disconnect(); } },
+      ([entry]) => { 
+        if (entry.isIntersecting) { 
+          setInView(true); 
+          obs.disconnect(); 
+        } 
+      },
       { threshold }
     );
     obs.observe(el);
@@ -39,9 +49,9 @@ function useInView(threshold = 0.2) {
 }
 
 const bars = [
-  { label: 'Direct Operations',   value: '4,201 tCO2e',  width: 45, color: 'bg-[#003527]' },
-  { label: 'Purchased Energy',    value: '8,930 tCO2e',  width: 75, color: 'bg-[#2b6954]' },
-  { label: 'Supply Chain & Travel', value: '11,461 tCO2e', width: 85, color: 'bg-[#bfc9c3]' },
+  { label: 'Transportation', value: '3,800 kgCO2e', width: 75, color: 'bg-[#003527]' },
+  { label: 'Home Energy',    value: '2,400 kgCO2e', width: 45, color: 'bg-[#2b6954]' },
+  { label: 'Diet & Lifestyle', value: '1,200 kgCO2e', width: 30, color: 'bg-[#bfc9c3]' },
 ];
 
 const methodologySteps = [
@@ -54,8 +64,8 @@ const LandingPage: React.FC = () => {
   /* ── hero card in-view trigger ── */
   const { ref: cardRef, inView: cardInView } = useInView(0.3);
 
-  /* ── animated counter: 24 592 ── */
-  const counterVal = useCountUp(24592, 1800, cardInView);
+  /* ── animated counter: 7 400 ── */
+  const counterVal = useCountUp(7400, 1800, cardInView);
   const formatted = counterVal.toLocaleString();
 
 
@@ -86,7 +96,7 @@ const LandingPage: React.FC = () => {
               ref={heroBgRef}
               alt="Cinematic forest landscape"
               className="w-full h-full object-cover object-center"
-              src="https://lh3.googleusercontent.com/aida/AP1WRLtcm20yHozH8eJPro1T9XJRtt_jfXFHD6TAmS51miR5Jeg3fasm0XDjc0IY5vO-23u25JJnXuddPvaZ-qkvo2ST0P9nwLHgOvd7XAL6Qwkqsb6svUbQzk5YlTsJbAHGQWoW4ZeI7HYqx34DeqX2jG7Ran3D-7S_GEgItkVHGiyW86l7dhyygrgAnXyeT13rYxMPR_kZnheyXNgUBED5aQbk2DldpJEQtlc6v0jST90fHBZC1hpWLAerLmE"
+              src="https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=1440&auto=format&fit=crop"
               style={{ animation: 'kenBurns 20s ease-in-out infinite alternate' }}
             />
 
@@ -137,12 +147,15 @@ const LandingPage: React.FC = () => {
               >
                 <Link
                   to="/assessment"
-                  className="bg-[#003527] text-white hover:bg-[#064e3b] transition-all px-8 py-4 rounded-full font-geist text-sm font-medium flex items-center justify-center gap-2 group"
+                  className="bg-[#003527] text-white hover:bg-[#064e3b] transition-all px-8 py-4 rounded-full font-geist text-sm font-medium flex items-center justify-center gap-2 group focus:outline-none focus:ring-2 focus:ring-[#003527] focus:ring-offset-2 focus:ring-offset-[#f9f9ff]"
                 >
                   Start Assessment
                   <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform" style={{ fontSize: '18px' }}>arrow_forward</span>
                 </Link>
-                <button className="glass-panel text-[#003527] border border-[#bfc9c3] hover:border-[#003527] transition-all px-8 py-4 rounded-full font-geist text-sm font-medium flex items-center justify-center gap-2">
+                <button 
+                  type="button"
+                  className="glass-panel text-[#003527] border border-[#bfc9c3] hover:border-[#003527] transition-all px-8 py-4 rounded-full font-geist text-sm font-medium flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-[#003527] focus:ring-offset-2 focus:ring-offset-[#f9f9ff]"
+                >
                   View Methodology
                 </button>
               </div>
@@ -172,7 +185,7 @@ const LandingPage: React.FC = () => {
                   >
                     {formatted}
                   </span>
-                  <span className="text-base text-[#404944] font-normal font-inter">tCO2e</span>
+                  <span className="text-base text-[#404944] font-normal font-inter">kgCO2e</span>
                 </div>
 
                 {/* items 2, 3, 4 ─ animated bars */}
@@ -255,7 +268,7 @@ const LandingPage: React.FC = () => {
                   <img
                     alt="Lush forest canopy"
                     className="w-full h-full object-cover"
-                    src="https://lh3.googleusercontent.com/aida/AP1WRLuHWZ3UWT268MiCC7SWHnRed6kDE0d-zkwSCyKjz8j9JhqiV3D6j6849IHLGeFOCS-yotZILyLO-xYeWGhFvP0kBTIAUt0UErU9qW6RHDpBr3RPVXLSQ1o-VyNt9hlHS2U7z5SM02TCkLKjNViZUD3ieiKZRSmcEpMLP-1AdJrbciNfSoCaoQVEsm-TkIKQmuY77Yvzk2PQv9siPwsc8IXmxl0MbafkYQHgnYUOUB12Pw1RAFa3z7iSbjw"
+                    src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?q=80&w=1000&auto=format&fit=crop"
                   />
                   <div className="absolute bottom-8 left-8 right-8 glass-panel rounded-2xl p-6 flex items-center justify-between">
                     <div>
@@ -341,7 +354,7 @@ const LandingPage: React.FC = () => {
             <img
               alt="Aerial view of mist over a lush green forest"
               className="w-full h-full object-cover object-center"
-              src="https://lh3.googleusercontent.com/aida/AP1WRLuPGU8WUEJ1v2oFeGlLkfgYpjXibhchWfS2JQWUmi3iaJMNCFHX2bpgUTXaXLHnPm4LoFszzweEX8Hz_mIZMRMnjPcufAERUyFy3I9j8YoZbpL6BQJgKhpP7B9FTIs93vHJuK5jA6jLx40IHfo1r4bFtg0Nu208cxX_Sthf8bxZiFoJAGSw-qHS5nhAK41zJ7jtvT4oijmieat4_mWng7QB7DmvgKbnmz1LFzESBXijvaAf9xF7FFYIfV8"
+              src="https://images.unsplash.com/photo-1503785640985-f62e3aeee448?q=80&w=1000&auto=format&fit=crop"
             />
             <div className="absolute inset-0 bg-[#003527]/80 backdrop-blur-[2px]" />
           </div>
@@ -356,7 +369,7 @@ const LandingPage: React.FC = () => {
             {/* item 6: only one CTA button now */}
             <Link
               to="/assessment"
-              className="bg-white text-[#003527] hover:bg-[#f1f3ff] transition-colors px-10 py-5 rounded-full font-geist text-lg shadow-lg hover:shadow-xl mt-4"
+              className="bg-white text-[#003527] hover:bg-[#f1f3ff] transition-colors px-10 py-5 rounded-full font-geist text-lg shadow-lg hover:shadow-xl mt-4 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#003527]"
             >
               Start Baseline Assessment
             </Link>

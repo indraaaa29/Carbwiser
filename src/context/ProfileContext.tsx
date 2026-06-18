@@ -45,7 +45,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const hasProfile = localStorage.getItem(STORAGE_KEY) !== null;
+  const hasProfile = profile !== DEFAULT_PROFILE;
 
   return (
     <ProfileContext.Provider value={{ profile, updateProfile, hasProfile }}>

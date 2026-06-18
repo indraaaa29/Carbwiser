@@ -1,4 +1,5 @@
 {
+  "name": "carbwiser",
   "rewrites": [
     {
       "source": "/(.*)",

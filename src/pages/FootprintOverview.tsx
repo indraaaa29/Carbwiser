@@ -1,21 +1,12 @@
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { calculateFootprint } from '../lib/carbonCalculation';
 import { useProfile } from '../context/ProfileContext';
 import { AnimatedNumber } from '../components/ui/AnimatedNumber';
 import { generateRecommendations } from '../lib/recommendationEngine';
-
-type PeriodData = {
-  id: string;
-  label: string;
-  footprint: number;
-  reduction: number;
-  reductionLabel: string;
-  ecoScore: number;
-  ecoScoreLabel: string;
-  percentages: { transportation: number; energy: number; food: number };
-};
+import { useFootprintPeriods } from '../hooks/useFootprintPeriods';
+import { AmbientBackground } from '../components/ui/AmbientBackground';
+import { EcoScoreGauge } from '../components/ui/EcoScoreGauge';
 
 const baseCategories = [
   {
@@ -51,62 +42,7 @@ const FootprintOverview: React.FC = () => {
   const [selectedPeriodId, setSelectedPeriodId] = React.useState('ytd');
   const { profile } = useProfile();
 
-  const periods: PeriodData[] = useMemo(() => {
-    const metrics = calculateFootprint(profile);
-    const BASELINE_AVG = 7000;
-    const lastYearFootprint = Math.round(metrics.total * 1.15);
-    const monthFootprint = Math.round(metrics.total / 12);
-
-    const ytdReduction = Math.round(((BASELINE_AVG - metrics.total) / BASELINE_AVG) * 100);
-    const lastYearReduction = Math.round(((metrics.total - lastYearFootprint) / lastYearFootprint) * 100);
-    const prevMonthFootprint = Math.round(monthFootprint * 1.08);
-    const monthReduction = Math.round(((prevMonthFootprint - monthFootprint) / prevMonthFootprint) * 100);
-
-    return [
-      {
-        id: 'ytd',
-        label: 'Current Year Estimate',
-        footprint: metrics.total,
-        reduction: ytdReduction,
-        reductionLabel: 'vs. national average',
-        ecoScore: metrics.ecoScore,
-        ecoScoreLabel: metrics.ecoScoreLabel,
-        percentages: { 
-          transportation: metrics.categories.transportation.percentage, 
-          energy: metrics.categories.energy.percentage, 
-          food: metrics.categories.food.percentage 
-        },
-      },
-      {
-        id: 'last-year',
-        label: 'Last Year (Estimated)',
-        footprint: lastYearFootprint,
-        reduction: lastYearReduction,
-        reductionLabel: 'vs. previous year',
-        ecoScore: Math.max(0, Math.round(100 - (lastYearFootprint / BASELINE_AVG) * 50)),
-        ecoScoreLabel: Math.max(0, Math.round(100 - (lastYearFootprint / BASELINE_AVG) * 50)) >= 80 ? 'Excellent' : Math.max(0, Math.round(100 - (lastYearFootprint / BASELINE_AVG) * 50)) >= 60 ? 'Good' : 'Needs Work',
-        percentages: { 
-          transportation: Math.round((metrics.categories.transportation.kg * 1.15 / (lastYearFootprint)) * 100) || 0,
-          energy: Math.round((metrics.categories.energy.kg * 1.15 / (lastYearFootprint)) * 100) || 0,
-          food: Math.round((metrics.categories.food.kg * 1.15 / (lastYearFootprint)) * 100) || 0,
-        },
-      },
-      {
-        id: 'last-month',
-        label: 'Last Month',
-        footprint: monthFootprint,
-        reduction: monthReduction,
-        reductionLabel: 'vs. prev month',
-        ecoScore: metrics.ecoScore,
-        ecoScoreLabel: metrics.ecoScoreLabel,
-        percentages: { 
-          transportation: metrics.categories.transportation.percentage, 
-          energy: metrics.categories.energy.percentage, 
-          food: metrics.categories.food.percentage 
-        },
-      }
-    ];
-  }, [profile]);
+  const periods = useFootprintPeriods(profile);
 
   const currentData = periods.find(p => p.id === selectedPeriodId) || periods[0];
   
@@ -159,19 +95,7 @@ const FootprintOverview: React.FC = () => {
           {/* Hero Cell: Total Footprint & Eco Score */}
           <div className="flex-grow lg:w-2/3 bg-[#003527] text-white rounded-[40px] p-8 md:p-12 flex flex-col justify-between relative overflow-hidden animate-fade-in-delay-1 shadow-xl border border-[#064e3b]">
             {/* Background SVG */}
-            <div className="absolute inset-0 opacity-20 pointer-events-none mix-blend-overlay">
-              <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
-                <defs>
-                  <radialGradient id="footprint-glow" cx="50%" cy="0%" r="70%">
-                    <stop offset="0%" stopColor="#b0f0d6" stopOpacity="0.8" />
-                    <stop offset="100%" stopColor="#003527" stopOpacity="0" />
-                  </radialGradient>
-                </defs>
-                <rect width="100" height="100" fill="url(#footprint-glow)" />
-                <path d="M0,100 C30,80 70,90 100,60 L100,100 Z" fill="#002117" opacity="0.3" />
-                <path d="M0,100 C40,90 60,70 100,80 L100,100 Z" fill="#0b513d" opacity="0.2" />
-              </svg>
-            </div>
+            <AmbientBackground />
 
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-12 relative z-10 h-full">
               {/* Total Footprint */}
@@ -225,34 +149,7 @@ const FootprintOverview: React.FC = () => {
                 />
                 <span className="font-geist text-sm font-bold text-[#95d3ba] uppercase tracking-widest mb-4 z-10" aria-hidden="true">Eco Score</span>
 
-                <div className="relative flex items-center justify-center w-32 h-32 z-10" aria-hidden="true">
-                  <svg className="w-full h-full transform -rotate-90 drop-shadow-lg" viewBox="0 0 36 36">
-                    <path
-                      className="text-[#064e3b]/50"
-                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                    />
-                    <motion.path
-                      className="text-[#b0f0d6]"
-                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeWidth="3"
-                      style={{ filter: 'drop-shadow(0 0 8px rgba(176, 240, 214, 0.6))' }}
-                      initial={{ pathLength: 0 }}
-                      animate={{ pathLength: currentData.ecoScore / 100 }}
-                      transition={{ duration: 1.5, ease: "easeOut" }}
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center flex-col">
-                    <span className="text-[56px] font-geist font-bold text-white leading-none tracking-tight">
-                      <AnimatedNumber value={currentData.ecoScore} />
-                    </span>
-                  </div>
-                </div>
+                <EcoScoreGauge score={currentData.ecoScore} />
 
                 <div className="mt-6 px-4 py-1.5 rounded-full bg-[#b0f0d6] text-[#002117] font-geist text-sm font-bold z-10 uppercase tracking-widest shadow-sm">
                   {currentData.ecoScoreLabel}

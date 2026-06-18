@@ -193,5 +193,16 @@ Carbwiser/
 
 ---
 
+## 🌐 Deployment Link
+The project is configured for seamless deployment on Vercel:
+* Live Deployment: [https://carbwiser.vercel.app](https://carbwiser.vercel.app)
+
+---
+
+## 📄 License
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+
 ## 🏁 Conclusion
 CarbWiser represents a paradigm shift in personal environmental responsibility. By combining enterprise-grade data visualization with intuitive, consumer-friendly design, it transforms the daunting task of carbon reduction into an engaging, manageable, and rewarding journey. Built with performance, accessibility, and scalability in mind, CarbWiser is ready to make a tangible impact.
