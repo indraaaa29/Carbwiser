@@ -195,7 +195,7 @@ Carbwiser/
 
 ## 🌐 Deployment Link
 The project is configured for seamless deployment on Vercel:
-* Live Deployment: [https://carbwiser.vercel.app](https://carbwiser.vercel.app)
+* Live Deployment: [[https://carbwiser.vercel.app](https://carbwiser.vercel.app)](https://carbwiser-phi.vercel.app/)
 
 ---
 
